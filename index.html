@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChessUnlocked - Level Up Your Chess Openings</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+    <style>
+        /* Custom styles */
+        body { font-family: 'Inter', sans-serif; }
+        .bg-gradient-header { background-image: linear-gradient(to right, #4338ca, #7e22ce, #db2777); }
+        .bg-gradient-hero { background-image: linear-gradient(to right, #312e81, #581c87, #9d174d); }
+        .bg-gradient-signup { background-image: linear-gradient(to right, #facc15, #fde047); }
+        .chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            width: min(80vw, 400px);
+            aspect-ratio: 1 / 1;
+            border: 10px solid #6b3d25; border-radius: 8px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            font-size: min(6vw, 32px);
+        }
+        .chessboard-square { display: flex; justify-content: center; align-items: center; user-select: none; }
+        .light-square { background-color: #f0d9b5; }
+        .dark-square { background-color: #b58863; }
+        .piece { text-shadow: 0 2px 4px rgba(0,0,0,0.25); transition: transform 0.3s ease-in-out; line-height: 1; }
+        .feature-card { cursor: pointer; }
+        .locked { opacity: 0.6; }
+        /* tiny utility for an inline status ribbon */
+        .ribbon {
+          position: fixed; bottom: 16px; right: 16px; z-index: 50;
+          background: #111827; color: #f9fafb; border-radius: 8px;
+          padding: 10px 14px; font-size: 12px; box-shadow: 0 10px 20px rgba(0,0,0,.25);
+        }
+    </style>
+</head>
+<body class="bg-indigo-50 dark:bg-gray-900 transition-colors duration-500">
+
+    <!-- Header -->
+    <header class="bg-gradient-header text-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 id="site-title" class="font-extrabold text-2xl tracking-tight select-none cursor-pointer">
+                ChessUnlocked
+            </h1>
+            <div class="flex items-center">
+                <nav id="main-nav" class="space-x-4 text-lg font-semibold hidden md:flex items-center">
+                    <button id="nav-repertoire-btn" class="hover:text-yellow-300 transition-colors duration-200 focus:outline-none">Repertoire Hub</button>
+                    <button id="nav-explorer-btn" class="hover:text-yellow-300 transition-colors duration-200 focus:outline-none">Explorer</button>
+                    <button id="nav-practice-btn" class="hover:text-yellow-300 transition-colors duration-200 focus:outline-none">Practice</button>
+                    <button id="nav-signup-btn" class="ml-4 px-4 py-2 bg-yellow-400 text-indigo-900 rounded-md font-bold hover:bg-yellow-300 transition focus:outline-none">Sign Up</button>
+                    <button id="nav-signout-btn" class="hidden ml-4 px-4 py-2 bg-pink-600 text-white rounded-md font-bold hover:bg-pink-500 transition focus:outline-none">Sign Out</button>
+                </nav>
+
+                <!-- Dark Mode Toggle -->
+                <button id="darkModeToggler" aria-label="Toggle Dark Mode" class="ml-4 text-yellow-300 hover:text-yellow-400 focus:outline-none text-2xl">
+                    🌙
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero -->
+        <section class="bg-gradient-hero text-white py-24 px-6 text-center">
+            <h2 class="text-5xl font-extrabold mb-4 max-w-3xl mx-auto leading-tight">
+                Level Up Your Chess Openings with <span class="text-yellow-400">ChessUnlocked</span>
+            </h2>
+            <p class="text-xl max-w-2xl mx-auto mb-8">
+                Master the London System, Slav Defense, King's Indian, and more with spaced repetition, rich stats, master games, and community wisdom.
+            </p>
+            <a id="hero-get-started" class="inline-block bg-yellow-400 text-indigo-900 font-bold px-8 py-4 rounded-lg shadow-lg hover:bg-yellow-300 transition">
+                Get Started for Free
+            </a>
+        </section>
+
+        <!-- Features -->
+        <section class="container mx-auto px-6 py-20">
+            <h2 class="text-4xl font-extrabold text-center mb-12 text-gray-800 dark:text-white">
+                Everything You Need to Succeed
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div id="repertoire" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300">
+                    <div class="text-5xl mb-4">♟️</div>
+                    <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-yellow-400">Repertoire Hub</h3>
+                    <p class="text-gray-700 dark:text-gray-300">Explore the full ECO-indexed opening list with powerful search and filtering.</p>
+                </div>
+
+                <div id="explorer" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300">
+                    <div class="text-5xl mb-4">🗺️</div>
+                    <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-yellow-400">Explorer Board</h3>
+                    <p class="text-gray-700 dark:text-gray-300">Watch famous openings unfold and explore key variations.</p>
+                </div>
+
+                <div id="practice" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300">
+                    <div class="text-5xl mb-4">🎯</div>
+                    <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-yellow-400">Practice Modes</h3>
+                    <p class="text-gray-700 dark:text-gray-300">Master openings through Learn, Drill, Time Trials, and Puzzle Galleries.</p>
+                </div>
+
+                <!-- Recommendations: requires full sign-in to call the coach -->
+                <div id="recommendations" data-requires-auth="true" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300 locked" role="button" tabindex="0" aria-pressed="false">
+                    <div class="text-5xl mb-4">💡</div>
+                    <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-yellow-400">✨ Recommendations</h3>
+                    <p class="text-gray-700 dark:text-gray-300">Get expert suggestions to expand and refine your repertoire.</p>
+                </div>
+
+                <!-- Customization: gated -->
+                <div id="customization" data-requires-auth="true" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300 locked" role="button" tabindex="0">
+                    <div class="text-5xl mb-4">🎨</div>
+                    <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-yellow-400">Customization</h3>
+                    <p class="text-gray-700 dark:text-gray-300">Themes, dark mode, and board styles tailored to your preferences.</p>
+                </div>
+
+                <!-- Analysis: gated -->
+                <div id="analysis" data-requires-auth="true" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300 locked" role="button" tabindex="0">
+                    <div class="text-5xl mb-4">📈</div>
+                    <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-yellow-400">Game Analysis</h3>
+                    <p class="text-gray-700 dark:text-gray-300">Upload your games to receive opening insights and coaching hints.</p>
+                </div>
+
+                <!-- Stats: gated -->
+                <div id="stats" data-requires-auth="true" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300 locked" role="button" tabindex="0">
+                    <div class="text-5xl mb-4">📊</div>
+                    <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-yellow-400">Performance Stats</h3>
+                    <p class="text-gray-700 dark:text-gray-300">Track your progress and identify areas for improvement.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Placeholder Sections -->
+        <section id="repertoire-hub-section" class="container mx-auto px-6 py-12 bg-gray-200 dark:bg-gray-800 rounded-lg my-8">
+            <h2 class="text-3xl font-extrabold mb-4 text-gray-800 dark:text-yellow-400 text-center">Repertoire Hub</h2>
+            <p class="text-center max-w-lg mx-auto text-gray-800 dark:text-gray-300">This is where your full, searchable list of openings will live. Sign up to build your custom repertoire!</p>
+        </section>
+
+        <section id="explorer-section" class="container mx-auto px-6 py-12">
+            <h2 class="text-3xl font-extrabold mb-8 text-gray-800 dark:text-yellow-400 text-center">
+                Interactive Explorer Board
+            </h2>
+            <div class="flex justify-center">
+                 <div id="chessboard" class="chessboard" aria-hidden="false"></div>
+            </div>
+            <div class="mt-6 text-center max-w-lg mx-auto">
+                <p id="opening-info" class="text-gray-800 dark:text-gray-300 mb-4">
+                    Watch a demonstration of a popular opening! Click the button to see the moves.
+                </p>
+                <button id="animate-opening-btn" class="bg-indigo-600 text-white font-bold px-6 py-2 rounded-lg shadow-md hover:bg-indigo-500 transition">
+                    Play Ruy Lopez Opening
+                </button>
+            </div>
+        </section>
+
+        <section id="practice-section" class="container mx-auto px-6 py-12 bg-gray-200 dark:bg-gray-800 rounded-lg my-8">
+            <h2 class="text-3xl font-extrabold mb-4 text-gray-800 dark:text-yellow-400 text-center">Practice Modes</h2>
+            <p class="text-center max-w-lg mx-auto text-gray-800 dark:text-gray-300">Learn, drill, and test your knowledge with timed trials and puzzles right here.</p>
+        </section>
+
+        <!-- Signup Section -->
+        <section id="signup" class="bg-gradient-signup py-16 px-6 text-indigo-900">
+            <div class="container mx-auto max-w-lg text-center">
+                 <div id="signupCard" class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-10">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-900 text-yellow-400 py-6 text-center select-none">
+        <p>© 2025 ChessUnlocked — Crafted with ♟️ by passionate chess learners.</p>
+    </footer>
+
+    <!-- Generic Modal -->
+    <div id="featureModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4" aria-hidden="true">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-8 max-w-md w-full">
+            <h3 id="modalTitle" class="text-2xl font-bold mb-4 text-gray-900 dark:text-yellow-400"></h3>
+            <p id="modalDescription" class="text-gray-700 dark:text-gray-300 mb-6"></p>
+            <button id="modalCloseBtn" class="w-full bg-indigo-800 text-yellow-400 font-bold py-2 rounded-md hover:bg-indigo-700 transition focus:outline-none">
+                Got it!
+            </button>
+        </div>
+    </div>
+
+    <!-- Recommendation Modal -->
+    <div id="recommendationModal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex justify-center items-center p-4 transition-opacity duration-300" aria-hidden="true">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-6 md:p-8 max-w-lg w-full transform transition-all duration-300 scale-95">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-yellow-400">✨ Opening Recommendations</h3>
+                <button id="recommendationCloseBtn" class="text-2xl font-bold text-gray-500 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white leading-none" aria-label="Close">&times;</button>
+            </div>
+            <div id="recommendationContent">
+                <p class="text-gray-700 dark:text-gray-300 mb-6">Tell us your style, and our coach will suggest new openings to explore!</p>
+                <div id="recommendationForm">
+                    <div class="space-y-4">
+                        <div>
+                            <label for="playingStyle" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Your Playing Style:</label>
+                            <select id="playingStyle" class="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <option>Aggressive</option>
+                                <option>Positional</option>
+                                <option>Solid & Defensive</option>
+                                <option>Tricky & Tactical</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="favoriteOpening" class="block text-sm font-medium text-gray-700 dark:text-gray-300">A Favorite Opening You Play:</label>
+                            <input type="text" id="favoriteOpening" placeholder="e.g., Sicilian Defense" class="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                    </div>
+
+                    <button id="getRecommendationBtn" class="mt-6 w-full bg-indigo-800 text-yellow-400 font-bold py-3 rounded-md hover:bg-indigo-700 transition focus:outline-none flex items-center justify-center">
+                        Get Recommendations ✨
+                    </button>
+                </div>
+
+                <div id="recommendationResult" class="mt-4 hidden prose prose-sm dark:prose-invert max-w-none prose-h4:text-yellow-500 prose-h4:dark:text-yellow-400 prose-code:bg-gray-200 prose-code:dark:bg-gray-700 prose-code:p-1 prose-code:rounded"></div>
+                <div id="recommendationLoader" class="mt-6 hidden text-center">
+                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400 mx-auto"></div>
+                     <p class="mt-2 text-gray-600 dark:text-gray-400">Our coach is thinking...</p>
+                </div>
+             </div>
+        </div>
+    </div>
+
+    <!-- Status ribbon (auto-updates with init results) -->
+    <div id="statusRibbon" class="ribbon hidden"></div>
+
+    <!-- Firebase + App JS -->
+    <script type="module">
+        /***** 🔧 CONFIG — REPLACE THESE VALUES (Firebase + Gemini) *****/
+        const CONFIG = {
+            APP_ID: "chessunlocked-prod", // any string; used only in Firestore path
+            FIREBASE: {
+                apiKey: "YOUR_FIREBASE_API_KEY",
+                authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+                projectId: "YOUR_PROJECT_ID",
+                storageBucket: "YOUR_PROJECT_ID.appspot.com",
+                messagingSenderId: "YOUR_SENDER_ID",
+                appId: "YOUR_APP_ID"
+            },
+            GEMINI_API_KEY: "YOUR_GEMINI_API_KEY"
+        };
+        /***** END CONFIG *****/
+
+        // --- Helper: show a bottom-right ribbon with status info
+        function setRibbon(text, color = 'bg-gray-900') {
+            const el = document.getElementById('statusRibbon');
+            if (!el) return;
+            el.textContent = text;
+            el.classList.remove('hidden', 'bg-red-700', 'bg-emerald-700', 'bg-yellow-700', 'bg-gray-900');
+            el.classList.add(color);
+        }
+
+        // --- Sanity checks so “Signup Error” is actually actionable
+        function validateConfig() {
+            const f = CONFIG.FIREBASE || {};
+            const missing = [];
+            ['apiKey','authDomain','projectId','appId'].forEach(k => { if (!f[k]) missing.push(`FIREBASE.${k}`); });
+            if (!CONFIG.GEMINI_API_KEY) missing.push('GEMINI_API_KEY');
+            return missing;
+        }
+
+        // Pieces map (kept from your original)
+        const pieces = {'r':'♜','n':'♞','b':'♝','q':'♛','k':'♚','p':'♟︎','R':'♖','N':'♘','B':'♗','Q':'♕','K':'♔','P':'♙'};
+
+        // DOM refs (grab early)
+        const navSignupBtn = document.getElementById('nav-signup-btn');
+        const navSignoutBtn = document.getElementById('nav-signout-btn');
+        const signupCard = document.getElementById('signupCard');
+        const darkModeToggler = document.getElementById('darkModeToggler');
+        const html = document.documentElement;
+        const featureModal = document.getElementById('featureModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDescription = document.getElementById('modalDescription');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+        const recommendationModal = document.getElementById('recommendationModal');
+        const recommendationCloseBtn = document.getElementById('recommendationCloseBtn');
+        const recommendationForm = document.getElementById('recommendationForm');
+        const recommendationLoader = document.getElementById('recommendationLoader');
+        const recommendationResult = document.getElementById('recommendationResult');
+        const getRecommendationBtn = document.getElementById('getRecommendationBtn');
+
+        // Explorer refs
+        const boardElement = document.getElementById('chessboard');
+        const openingInfo = document.getElementById('opening-info');
+        const animateBtn = document.getElementById('animate-opening-btn');
+
+        // --- Utility: Generic modal open/close ---
+        function openModal(title, description) {
+            modalTitle.textContent = title;
+            modalDescription.textContent = description;
+            featureModal.classList.remove('hidden');
+            featureModal.setAttribute('aria-hidden', 'false');
+        }
+        function closeModal() {
+            featureModal.classList.add('hidden');
+            featureModal.setAttribute('aria-hidden', 'true');
+        }
+        modalCloseBtn?.addEventListener('click', closeModal);
+        featureModal?.addEventListener('click', (e) => { if (e.target === featureModal) closeModal(); });
+
+        // Recommendation modal helpers
+        function openRecommendationModal() {
+            recommendationModal?.classList.remove('hidden');
+            recommendationModal?.setAttribute('aria-hidden', 'false');
+        }
+        function closeRecommendationModal() {
+            recommendationModal?.classList.add('hidden');
+            recommendationModal?.setAttribute('aria-hidden', 'true');
+        }
+        recommendationCloseBtn?.addEventListener('click', closeRecommendationModal);
+        recommendationModal?.addEventListener('click', (e) => { if (e.target === recommendationModal) closeRecommendationModal(); });
+
+        // --- Theme (dark mode) logic ---
+        function applyTheme(isDark) {
+            if (isDark) { html.classList.add('dark'); darkModeToggler.textContent = '☀️'; }
+            else { html.classList.remove('dark'); darkModeToggler.textContent = '🌙'; }
+        }
+        (function initTheme() {
+            try {
+                const stored = localStorage.getItem('theme');
+                if (stored === 'dark') applyTheme(true);
+                else if (stored === 'light') applyTheme(false);
+                else {
+                    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    applyTheme(prefersDark);
+                    localStorage.setItem('theme', prefersDark ? 'dark' : 'light');
+                }
+            } catch { applyTheme(false); }
+        })();
+        darkModeToggler?.addEventListener('click', () => {
+            const newIsDark = !html.classList.contains('dark');
+            try { localStorage.setItem('theme', newIsDark ? 'dark' : 'light'); } catch {}
+            applyTheme(newIsDark);
+        });
+
+        // --- Chessboard rendering and animation (Ruy Lopez demo) ---
+        const ruyLopezSequence = [
+            { pos: ['rnbqkbnr','pppppppp','........','........','........','........','PPPPPPPP','RNBQKBNR'], move: 'Starting Position' },
+            { pos: ['rnbqkbnr','pppppppp','........','........','....P...','........','PPPP.PPP','RNBQKBNR'], move: '1. e4' },
+            { pos: ['rnbqkbnr','pppp.ppp','........','....p...','....P...','........','PPPP.PPP','RNBQKBNR'], move: '1... e5' },
+            { pos: ['rnbqkbnr','pppp.ppp','........','....p...','....P...','.....N..','PPPP.PPP','RNBQKB.R'], move: '2. Nf3' },
+            { pos: ['r.bqkbnr','pppp.ppp','..n.....','....p...','....P...','.....N..','PPPP.PPP','RNBQKB.R'], move: '2... Nc6' },
+            { pos: ['r.bqkbnr','pppp.ppp','..n.....','.B..p...','....P...','.....N..','PPPP.PPP','RNBQK..R'], move: '3. Bb5' },
+        ];
+        let animationInterval = null;
+        function renderBoard(position) {
+            if (!boardElement) return;
+            boardElement.innerHTML = '';
+            for (let row = 0; row < 8; row++) {
+                const rowStr = position[row];
+                for (let col = 0; col < 8; col++) {
+                    const square = document.createElement('div');
+                    const isDark = (row + col) % 2 !== 0;
+                    square.className = `chessboard-square ${isDark ? 'dark-square' : 'light-square'}`;
+                    const pieceChar = rowStr[col];
+                    if (pieceChar && pieceChar !== '.') {
+                        const pieceElement = document.createElement('span');
+                        pieceElement.className = 'piece';
+                        pieceElement.textContent = pieces[pieceChar] || '';
+                        const isBlack = (pieceChar === pieceChar.toLowerCase());
+                        pieceElement.style.color = isBlack ? '#1e293b' : '#f8fafc';
+                        square.appendChild(pieceElement);
+                    }
+                    boardElement.appendChild(square);
+                }
+            }
+        }
+        // initial render
+        renderBoard(ruyLopezSequence[0].pos);
+        animateBtn?.addEventListener('click', () => {
+            clearInterval(animationInterval);
+            let moveIndex = 0;
+            animateBtn.disabled = true;
+            animationInterval = setInterval(() => {
+                if (moveIndex >= ruyLopezSequence.length) {
+                    clearInterval(animationInterval);
+                    openingInfo.textContent = "That's the Ruy Lopez! Click again to replay.";
+                    animateBtn.disabled = false;
+                    return;
+                }
+                const currentMove = ruyLopezSequence[moveIndex];
+                openingInfo.textContent = currentMove.move;
+                renderBoard(currentMove.pos);
+                moveIndex++;
+            }, 1200);
+        });
+
+        // --- App UI helpers (lock/unlock gated features) ---
+        function setLockedState(locked) {
+            document.querySelectorAll('[data-requires-auth]').forEach(el => {
+                if (locked) { el.classList.add('locked'); el.setAttribute('aria-hidden', 'true'); }
+                else { el.classList.remove('locked'); el.removeAttribute('aria-hidden'); }
+            });
+        }
+
+        // Signup handler (with better error reporting)
+        const handleSignup = async (e) => {
+            e.preventDefault();
+            const emailInput = document.getElementById('emailInput');
+            const passwordInput = document.getElementById('passwordInput');
+            const formMessage = document.getElementById('formMessage');
+            const signupButton = document.getElementById('signupButton');
+            const signupButtonText = document.getElementById('signup-button-text');
+            const signupLoader = document.getElementById('signup-loader');
+
+            const email = emailInput?.value?.trim() || '';
+            const password = passwordInput?.value || '';
+
+            if (password.length < 6) {
+                formMessage.textContent = 'Password must be at least 6 characters.';
+                formMessage.className = 'mt-2 font-semibold text-red-600';
+                return;
+            }
+            signupButtonText?.classList.add('hidden');
+            signupLoader?.classList.remove('hidden');
+            if (signupButton) signupButton.disabled = true;
+            if (formMessage) formMessage.textContent = '';
+
+            try {
+                if (!auth) throw new Error('Auth not initialized — check Firebase config.');
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                if (db) {
+                    try {
+                        const userDocRef = doc(db, `artifacts/${CONFIG.APP_ID}/users/${user.uid}/profile`, 'data');
+                        await setDoc(userDocRef, { email: user.email, createdAt: new Date().toISOString() });
+                    } catch (fsErr) {
+                        console.warn("Firestore write failed:", fsErr);
+                    }
+                }
+            } catch (error) {
+                console.error("Signup Error:", error);
+                const formMessageEl = document.getElementById('formMessage');
+                const code = (error && error.code) ? String(error.code) : '';
+                if (code === 'auth/invalid-email') formMessageEl.textContent = 'Please enter a valid email address.';
+                else if (code === 'auth/operation-not-allowed') formMessageEl.textContent = 'Email/password sign-in is disabled in Firebase (enable it in Authentication → Sign-in method).';
+                else if (code === 'auth/email-already-in-use') formMessageEl.textContent = 'This email is already registered.';
+                else if (String(error?.message || '').includes('Auth not initialized')) formMessageEl.textContent = 'Firebase is not initialized — check the config at the top of index.html.';
+                else formMessageEl.textContent = 'An error occurred. Open the browser console for details.';
+                formMessageEl.className = 'mt-2 font-semibold text-red-600';
+            } finally {
+                signupButtonText?.classList.remove('hidden');
+                signupLoader?.classList.add('hidden');
+                if (signupButton) signupButton.disabled = false;
+            }
+        };
+
+        const showSignedOutUI = () => {
+            navSignupBtn?.classList.remove('hidden');
+            navSignoutBtn?.classList.add('hidden');
+
+            if (!signupCard) return;
+            signupCard.innerHTML = `
+                <h2 class="text-3xl font-extrabold mb-6 text-gray-900 dark:text-white">Join ChessUnlocked Today</h2>
+                <p id="signup-prompt" class="mb-6 text-gray-700 dark:text-gray-300">
+                    Sign up for free to start mastering openings with personalized drills, master games, and community insights.
+                </p>
+                <form id="signupForm" class="flex flex-col space-y-4" novalidate>
+                    <input type="email" id="emailInput" placeholder="Your email address" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" required aria-label="Email address">
+                    <input type="password" id="passwordInput" placeholder="Choose a password" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" required aria-label="Password">
+                    <button type="submit" id="signupButton" class="bg-indigo-800 text-yellow-400 font-bold py-3 rounded-md hover:bg-indigo-700 transition focus:outline-none flex justify-center items-center">
+                        <span id="signup-button-text">Create Account</span>
+                        <div id="signup-loader" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-yellow-400 ml-3"></div>
+                    </button>
+                    <p id="formMessage" class="mt-2 font-semibold h-5" role="alert"></p>
+                </form>
+            `;
+            document.getElementById('signupForm')?.addEventListener('submit', handleSignup);
+            setLockedState(true);
+        };
+
+        const showSignedInUI = (user) => {
+            navSignupBtn?.classList.add('hidden');
+            navSignoutBtn?.classList.remove('hidden');
+            if (!signupCard) return;
+            const emailText = user?.email || (user?.isAnonymous ? 'Anonymous' : 'User');
+            signupCard.innerHTML = `
+                <h2 class="text-3xl font-extrabold mb-6 text-green-600 dark:text-green-400">Welcome back!</h2>
+                <p class="text-gray-700 dark:text-gray-300">You're all set. Start exploring the features above or sign out.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">Signed in as ${emailText}</p>
+            `;
+            const isFullUser = !user.isAnonymous;
+            setLockedState(!isFullUser);
+        };
+
+        // --- Import Firebase (from CDN) ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import {
+            getAuth,
+            onAuthStateChanged,
+            createUserWithEmailAndPassword,
+            signOut,
+            signInWithCustomToken,
+            signInAnonymously
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Auth init ---
+        let app = null, auth = null, db = null;
+
+        // Init guard + helpful status
+        (function bootstrap() {
+            const missing = validateConfig();
+            if (missing.length) {
+                setRibbon(`Missing config: ${missing.join(', ')}`, 'bg-yellow-700');
+                console.warn('Missing required config keys:', missing);
+            } else {
+                setRibbon('Config OK. Initializing…', 'bg-emerald-700');
+            }
+        })();
+
+        try {
+            app = initializeApp(CONFIG.FIREBASE);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            console.log("✅ Firebase initialized.");
+            setRibbon('Firebase ready', 'bg-emerald-700');
+        } catch (error) {
+            console.error("❌ Firebase initialization failed:", error);
+            setRibbon('Firebase init failed — open console', 'bg-red-700');
+            if (signupCard) {
+                signupCard.innerHTML = `<p class="text-red-500 font-bold">Error: Could not connect to services. Check your Firebase config at the top of index.html and refresh.</p>`;
+            }
+        }
+
+        // --- Auth state observer ---
+        if (auth) {
+            onAuthStateChanged(auth, user => {
+                if (user) {
+                    console.log("User is signed in:", user.uid, "isAnonymous:", !!user.isAnonymous);
+                    showSignedInUI(user);
+                } else {
+                    console.log("User is signed out.");
+                    showSignedOutUI();
+                }
+            });
+        } else {
+            showSignedOutUI();
+        }
+
+        // --- Initial Sign In (anonymous by default if no token) ---
+        (async function initialSignIn() {
+            if (!auth) return;
+            try {
+                // No server token on GitHub Pages; just go anonymous for onboarding
+                await signInAnonymously(auth);
+            } catch (error) {
+                console.error("Initial sign-in error:", error);
+            }
+        })();
+
+        // --- Sign Out ---
+        navSignoutBtn?.addEventListener('click', () => {
+            if (!auth) return;
+            signOut(auth).catch((error) => {
+                console.error('Sign Out Error', error);
+                openModal('Sign Out Failed', 'There was a problem signing you out. Please try again.');
+            });
+        });
+
+        // --- Smooth Scrolling helpers ---
+        window.scrollToSection = (id) => {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+        window.scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
+        // Attach nav + header listeners
+        document.getElementById('site-title')?.addEventListener('click', () => window.scrollToTop());
+        document.getElementById('nav-repertoire-btn')?.addEventListener('click', () => window.scrollToSection('repertoire-hub-section'));
+        document.getElementById('nav-explorer-btn')?.addEventListener('click', () => window.scrollToSection('explorer-section'));
+        document.getElementById('nav-practice-btn')?.addEventListener('click', () => window.scrollToSection('practice-section'));
+        document.getElementById('hero-get-started')?.addEventListener('click', () => window.scrollToSection('signup'));
+        navSignupBtn?.addEventListener('click', () => window.scrollToSection('signup'));
+
+        // --- Guard helpers for gated features ---
+        function runIfFullUser(action) {
+            const user = auth?.currentUser;
+            if (!user) { openModal('Sign in required', 'Please sign up or sign in to use this feature.'); return; }
+            if (user.isAnonymous) { openModal('Feature locked', 'This feature requires a full account. Please sign up or sign in to unlock it.'); return; }
+            action();
+        }
+        function guardedOpenModal(title, lockedText) {
+            const user = auth?.currentUser;
+            if (user && !user.isAnonymous) openModal(title, `Welcome! ${title} is now available for your account.`);
+            else openModal(title, lockedText + ' Sign up to unlock this feature.');
+        }
+        function guardedOpenRecommendationModal() { runIfFullUser(() => openRecommendationModal()); }
+
+        // Attach clicks for gated items
+        document.getElementById('recommendations')?.addEventListener('click', guardedOpenRecommendationModal);
+        document.getElementById('customization')?.addEventListener('click', () =>
+            guardedOpenModal('Customization', 'This feature will allow you to change board colors, piece styles, and more. Sign up to be notified!')
+        );
+        document.getElementById('analysis')?.addEventListener('click', () =>
+            guardedOpenModal('Game Analysis', 'Upload your PGN files to get instant feedback on your opening play. Sign up to get access!')
+        );
+        document.getElementById('stats')?.addEventListener('click', () =>
+            guardedOpenModal('Performance Stats', 'Track your accuracy and mastery level for each opening in your repertoire. Sign up to start tracking!')
+        );
+
+        // Keyboard activation on feature cards
+        document.querySelectorAll('[data-requires-auth]').forEach(el => {
+            el.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); el.click(); }
+            });
+        });
+
+        // --- Recommendation button click (calls Gemini with browser fetch)
+        getRecommendationBtn?.addEventListener('click', async () => {
+            const user = auth?.currentUser;
+            if (!user || user.isAnonymous) {
+                openModal('Sign up to get recommendations', 'You must sign up for a full account to use the coach. Sign up or sign in to continue.');
+                return;
+            }
+
+            const style = document.getElementById('playingStyle')?.value || 'Balanced';
+            const opening = document.getElementById('favoriteOpening')?.value || 'the basics';
+            const form = document.getElementById('recommendationForm');
+            recommendationLoader?.classList.remove('hidden');
+            if (form) form.classList.add('hidden');
+            if (recommendationResult) { recommendationResult.innerHTML = ''; recommendationResult.classList.add('hidden'); }
+
+            const prompt = `You are a friendly and encouraging chess coach. A student who enjoys a "${style}" playing style and currently plays "${opening}" wants to learn something new. Please recommend three new chess openings that would suit them. For each recommendation: 1. Give the name of the opening. 2. Provide a one-sentence, easy-to-understand description of its main idea. 3. List the first 3 typical moves for both White and Black. Format your response in simple HTML using <h4> for the opening name, <p> for the description, and <code> for the moves.`;
+
+            try {
+                if (!CONFIG.GEMINI_API_KEY || CONFIG.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
+                    throw new Error('Missing API key for recommendation service. Add GEMINI_API_KEY at the top of index.html.');
+                }
+                const payload = { contents: [{ role: 'user', parts: [{ text: prompt }] }] };
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${encodeURIComponent(CONFIG.GEMINI_API_KEY)}`;
+
+                const resp = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!resp.ok) throw new Error(`Coach API HTTP ${resp.status}`);
+                const json = await resp.json();
+                const text = json?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!text) throw new Error('Coach returned no content');
+
+                recommendationResult.innerHTML = text;
+                recommendationResult.classList.remove('hidden');
+
+            } catch (err) {
+                console.error('Recommendation Error:', err);
+                recommendationResult.innerHTML = `<p class="text-red-500">Sorry — the coach is unavailable right now. ${String(err?.message || '')}</p>`;
+                recommendationResult.classList.remove('hidden');
+            } finally {
+                recommendationLoader?.classList.add('hidden');
+                if (form) form.classList.remove('hidden');
+            }
+        });
+
+        // --- “Test cases” for your page (quick validation in console) ---
+        (function selfTests() {
+            const cases = [];
+            const f = CONFIG.FIREBASE || {};
+            cases.push({ name: 'Firebase apiKey present', pass: !!f.apiKey });
+            cases.push({ name: 'Auth domain present', pass: !!f.authDomain });
+            cases.push({ name: 'Project ID present', pass: !!f.projectId });
+            cases.push({ name: 'App ID present', pass: !!f.appId });
+            cases.push({ name: 'Gemini key present', pass: !!CONFIG.GEMINI_API_KEY });
+
+            const allPass = cases.every(c => c.pass);
+            console.groupCollapsed('%cChessUnlocked — setup self-tests', 'color:#10b981;font-weight:bold');
+            cases.forEach(c => console.log(`${c.pass ? '✅' : '❌'} ${c.name}`));
+            console.log(allPass ? 'All checks passed.' : 'Some checks failed. See above.');
+            console.groupEnd();
+        })();
+    </script>
+</body>
+</html>
