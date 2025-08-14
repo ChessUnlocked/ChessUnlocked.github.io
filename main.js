@@ -25,13 +25,13 @@ signInAnonymously(auth)
   .catch(err => console.error("❌ Firebase sign-in error:", err));
 
 // ===== Gemini API key =====
-const GEMINI_API_KEY = "PASTE-YOUR-GEMINI-API-KEY-HERE";
+const GEMINI_API_KEY = "AIzaSyAfVgcEB0PxaOt34lZqiohqqqgKn9xpzfU";
 
 // ===== Run Gemini =====
 async function runGemini() {
   try {
     const res = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + GEMINI_API_KEY,
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + AIzaSyAfVgcEB0PxaOt34lZqiohqqqgKn9xpzfU,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
