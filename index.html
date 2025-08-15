@@ -294,6 +294,13 @@
         const openingInfo = document.getElementById('opening-info');
         const animateBtn = document.getElementById('animate-opening-btn');
 
+            import { setupAuthUI } from './auth.js';
+            setupAuthUI({
+                navSignupBtn: document.getElementById('nav-signup-btn'),
+                navSignoutBtn: document.getElementById('nav-signout-btn'),
+                signupCard: document.getElementById('signupCard'),
+                config: CONFIG
+            });
         // --- Utility: Generic modal open/close ---
         function openModal(title, description) {
             modalTitle.textContent = title;
