@@ -480,17 +480,93 @@
         };
 
         const showSignedInUI = (user) => {
-            navSignupBtn?.classList.add('hidden');
-            navSignoutBtn?.classList.remove('hidden');
-            if (!signupCard) return;
-            const emailText = user?.email || (user?.isAnonymous ? 'Anonymous' : 'User');
-            signupCard.innerHTML = `
-                <h2 class="text-3xl font-extrabold mb-6 text-green-600 dark:text-green-400">Welcome back!</h2>
-                <p class="text-gray-700 dark:text-gray-300">You're all set. Start exploring the features above or sign out.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">Signed in as ${emailText}</p>
-            `;
-            const isFullUser = !user.isAnonymous;
+            const isFullUser = user && !user.isAnonymous;
+            if (isFullUser) {
+                navSignupBtn?.classList.add('hidden');
+                navSignoutBtn?.classList.remove('hidden');
+                if (signupCard) {
+                    const emailText = user?.email || 'User';
+                    signupCard.innerHTML = `
+                        <h2 class="text-3xl font-extrabold mb-6 text-green-600 dark:text-green-400">Welcome back!</h2>
+                        <p class="text-gray-700 dark:text-gray-300">You're all set. Start exploring the features above or sign out.</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">Signed in as ${emailText}</p>
+                    `;
+                }
+            } else {
+                navSignupBtn?.classList.remove('hidden');
+                navSignoutBtn?.classList.add('hidden');
+                if (signupCard) {
+                    signupCard.innerHTML = `
+                        <h2 class="text-3xl font-extrabold mb-6 text-gray-900 dark:text-white">Join ChessUnlocked Today</h2>
+                        <p id="signup-prompt" class="mb-6 text-gray-700 dark:text-gray-300">
+                            Sign up for free to start mastering openings with personalized drills, master games, and community insights.
+                        </p>
+                        <form id="signupForm" class="flex flex-col space-y-4" novalidate>
+                            <input type="email" id="emailInput" placeholder="Your email address" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" required aria-label="Email address">
+                            <input type="password" id="passwordInput" placeholder="Choose a password" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" required aria-label="Password">
+                            <button type="submit" id="signupButton" class="bg-indigo-800 text-yellow-400 font-bold py-3 rounded-md hover:bg-indigo-700 transition focus:outline-none flex justify-center items-center">
+                                <span id="signup-button-text">Create Account</span>
+                                <div id="signup-loader" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-yellow-400 ml-3"></div>
+                            </button>
+                            <p id="formMessage" class="mt-2 font-semibold h-5" role="alert"></p>
+                        </form>
+                        <hr class="my-6 border-gray-300 dark:border-gray-600">
+                        <form id="signinForm" class="flex flex-col space-y-4" novalidate>
+                            <input type="email" id="signinEmailInput" placeholder="Email address" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-indigo-400" required aria-label="Email address">
+                            <input type="password" id="signinPasswordInput" placeholder="Password" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-indigo-400" required aria-label="Password">
+                            <button type="submit" id="signinButton" class="bg-indigo-600 text-white font-bold py-3 rounded-md hover:bg-indigo-500 transition focus:outline-none flex justify-center items-center">
+                                <span id="signin-button-text">Sign In</span>
+                                <div id="signin-loader" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-white ml-3"></div>
+                            </button>
+                            <p id="signinFormMessage" class="mt-2 font-semibold h-5" role="alert"></p>
+                        </form>
+                    `;
+                    document.getElementById('signupForm')?.addEventListener('submit', handleSignup);
+                    document.getElementById('signinForm')?.addEventListener('submit', handleSignin);
+                }
+            }
             setLockedState(!isFullUser);
+        // Sign in handler
+        const handleSignin = async (e) => {
+            e.preventDefault();
+            const emailInput = document.getElementById('signinEmailInput');
+            const passwordInput = document.getElementById('signinPasswordInput');
+            const formMessage = document.getElementById('signinFormMessage');
+            const signinButton = document.getElementById('signinButton');
+            const signinButtonText = document.getElementById('signin-button-text');
+            const signinLoader = document.getElementById('signin-loader');
+
+            const email = emailInput?.value?.trim() || '';
+            const password = passwordInput?.value || '';
+
+            if (!email || !password) {
+                formMessage.textContent = 'Please enter your email and password.';
+                formMessage.className = 'mt-2 font-semibold text-red-600';
+                return;
+            }
+            signinButtonText?.classList.add('hidden');
+            signinLoader?.classList.remove('hidden');
+            if (signinButton) signinButton.disabled = true;
+            if (formMessage) formMessage.textContent = '';
+
+            try {
+                if (!auth) throw new Error('Auth not initialized — check Firebase config.');
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                // Success: UI will update via onAuthStateChanged
+            } catch (error) {
+                const code = (error && error.code) ? String(error.code) : '';
+                if (code === 'auth/invalid-email') formMessage.textContent = 'Invalid email address.';
+                else if (code === 'auth/user-not-found') formMessage.textContent = 'No account found for this email.';
+                else if (code === 'auth/wrong-password') formMessage.textContent = 'Incorrect password.';
+                else if (String(error?.message || '').includes('Auth not initialized')) formMessage.textContent = 'Firebase is not initialized — check the config at the top of index.html.';
+                else formMessage.textContent = 'Sign in failed. Open the browser console for details.';
+                formMessage.className = 'mt-2 font-semibold text-red-600';
+            } finally {
+                signinButtonText?.classList.remove('hidden');
+                signinLoader?.classList.add('hidden');
+                if (signinButton) signinButton.disabled = false;
+            }
+        };
         };
 
         // --- Import Firebase (from CDN) ---
