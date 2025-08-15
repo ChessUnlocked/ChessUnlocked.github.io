@@ -168,6 +168,7 @@
         <section id="signup" class="bg-gradient-signup py-16 px-6 text-indigo-900">
             <div class="container mx-auto max-w-lg text-center">
                  <div id="signupCard" class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-10">
+                    <div id="firebase-error" class="hidden text-red-500 font-bold mb-4"></div>
                     <!-- Populated by JS -->
                 </div>
             </div>
@@ -527,6 +528,11 @@
         } catch (error) {
             console.error("❌ Firebase initialization failed:", error);
             setRibbon('Firebase init failed — open console', 'bg-red-700');
+            const firebaseErrorDiv = document.getElementById('firebase-error');
+            if (firebaseErrorDiv) {
+                firebaseErrorDiv.textContent = 'Error: Could not connect to services. Please check your Firebase project settings and ensure this domain is authorized.';
+                firebaseErrorDiv.classList.remove('hidden');
+            }
             if (signupCard) {
                 signupCard.innerHTML = `<p class="text-red-500 font-bold">Error: Could not connect to services. Check your Firebase config at the top of index.html and refresh.</p>`;
             }
