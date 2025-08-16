@@ -56,8 +56,9 @@
                     <button id="nav-repertoire-btn" class="hover:text-yellow-300 transition-colors duration-200 focus:outline-none">Repertoire Hub</button>
                     <button id="nav-explorer-btn" class="hover:text-yellow-300 transition-colors duration-200 focus:outline-none">Explorer</button>
                     <button id="nav-practice-btn" class="hover:text-yellow-300 transition-colors duration-200 focus:outline-none">Practice</button>
-                    <button id="nav-signup-btn" class="ml-4 px-4 py-2 bg-yellow-400 text-indigo-900 rounded-md font-bold hover:bg-yellow-300 transition focus:outline-none">Sign Up</button>
-                    <button id="nav-signout-btn" class="hidden ml-4 px-4 py-2 bg-pink-600 text-white rounded-md font-bold hover:bg-pink-500 transition focus:outline-none">Sign Out</button>
+                    <button id="nav-signin-btn" class="ml-4 px-4 py-2 bg-indigo-600 text-white rounded-md font-bold text-lg hover:bg-indigo-500 transition focus:outline-none">Sign In</button>
+                    <button id="nav-signup-btn" class="ml-4 px-4 py-2 bg-yellow-400 text-indigo-900 rounded-md font-bold text-lg hover:bg-yellow-300 transition focus:outline-none">Sign Up</button>
+                    <button id="nav-signout-btn" class="hidden ml-4 px-4 py-2 bg-pink-600 text-white rounded-md font-bold text-lg hover:bg-pink-500 transition focus:outline-none">Sign Out</button>
                 </nav>
 
                 <!-- Dark Mode Toggle -->
@@ -272,6 +273,7 @@
         const pieces = {'r':'♜','n':'♞','b':'♝','q':'♛','k':'♚','p':'♟︎','R':'♖','N':'♘','B':'♗','Q':'♕','K':'♔','P':'♙'};
 
         // DOM refs (grab early)
+        const navSigninBtn = document.getElementById('nav-signin-btn');
         const navSignupBtn = document.getElementById('nav-signup-btn');
         const navSignoutBtn = document.getElementById('nav-signout-btn');
         const signupCard = document.getElementById('signupCard');
@@ -455,14 +457,12 @@
             }
         };
 
-        const showSignedOutUI = () => {
-            navSignupBtn?.classList.remove('hidden');
-            navSignoutBtn?.classList.add('hidden');
-
+        // Show sign-up form
+        const showSignupForm = () => {
             if (!signupCard) return;
             signupCard.innerHTML = `
                 <h2 class="text-3xl font-extrabold mb-6 text-gray-900 dark:text-white">Join ChessUnlocked Today</h2>
-                <p id="signup-prompt" class="mb-6 text-gray-700 dark:text-gray-300">
+                <p class="mb-6 text-gray-700 dark:text-gray-300">
                     Sign up for free to start mastering openings with personalized drills, master games, and community insights.
                 </p>
                 <form id="signupForm" class="flex flex-col space-y-4" novalidate>
@@ -474,14 +474,63 @@
                     </button>
                     <p id="formMessage" class="mt-2 font-semibold h-5" role="alert"></p>
                 </form>
+                <div class="text-center mt-4">
+                    <p class="text-gray-600 dark:text-gray-400">Already have an account? 
+                        <button id="switchToSignin" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 underline font-medium">Sign In</button>
+                    </p>
+                </div>
             `;
             document.getElementById('signupForm')?.addEventListener('submit', handleSignup);
+            document.getElementById('switchToSignin')?.addEventListener('click', showSigninForm);
+        };
+
+        // Show sign-in form
+        const showSigninForm = () => {
+            if (!signupCard) return;
+            signupCard.innerHTML = `
+                <h2 class="text-3xl font-extrabold mb-6 text-gray-900 dark:text-white">Welcome Back!</h2>
+                <p class="mb-6 text-gray-700 dark:text-gray-300">
+                    Sign in to continue mastering your chess openings.
+                </p>
+                <form id="signinForm" class="flex flex-col space-y-4" novalidate>
+                    <input type="email" id="signinEmailInput" placeholder="Email address" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-indigo-400" required aria-label="Email address">
+                    <input type="password" id="signinPasswordInput" placeholder="Password" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-indigo-400" required aria-label="Password">
+                    <button type="submit" id="signinButton" class="bg-indigo-600 text-white font-bold py-3 rounded-md hover:bg-indigo-500 transition focus:outline-none flex justify-center items-center">
+                        <span id="signin-button-text">Sign In</span>
+                        <div id="signin-loader" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-white ml-3"></div>
+                    </button>
+                    <div class="text-center mt-3">
+                        <button type="button" id="forgotPasswordLink" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 underline focus:outline-none">
+                            Forgot your password?
+                        </button>
+                    </div>
+                    <p id="signinFormMessage" class="mt-2 font-semibold h-5" role="alert"></p>
+                </form>
+                <div class="text-center mt-4">
+                    <p class="text-gray-600 dark:text-gray-400">Don't have an account? 
+                        <button id="switchToSignup" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 underline font-medium">Sign Up</button>
+                    </p>
+                </div>
+            `;
+            document.getElementById('signinForm')?.addEventListener('submit', handleSignin);
+            document.getElementById('forgotPasswordLink')?.addEventListener('click', handleForgotPassword);
+            document.getElementById('switchToSignup')?.addEventListener('click', showSignupForm);
+        };
+
+        const showSignedOutUI = () => {
+            navSigninBtn?.classList.remove('hidden');
+            navSignupBtn?.classList.remove('hidden');
+            navSignoutBtn?.classList.add('hidden');
+            
+            // Default to showing signup form
+            showSignupForm();
             setLockedState(true);
         };
 
         const showSignedInUI = (user) => {
             const isFullUser = user && !user.isAnonymous;
             if (isFullUser) {
+                navSigninBtn?.classList.add('hidden');
                 navSignupBtn?.classList.add('hidden');
                 navSignoutBtn?.classList.remove('hidden');
                 if (signupCard) {
@@ -493,39 +542,14 @@
                     `;
                 }
             } else {
+                navSigninBtn?.classList.remove('hidden');
                 navSignupBtn?.classList.remove('hidden');
                 navSignoutBtn?.classList.add('hidden');
-                if (signupCard) {
-                    signupCard.innerHTML = `
-                        <h2 class="text-3xl font-extrabold mb-6 text-gray-900 dark:text-white">Join ChessUnlocked Today</h2>
-                        <p id="signup-prompt" class="mb-6 text-gray-700 dark:text-gray-300">
-                            Sign up for free to start mastering openings with personalized drills, master games, and community insights.
-                        </p>
-                        <form id="signupForm" class="flex flex-col space-y-4" novalidate>
-                            <input type="email" id="emailInput" placeholder="Your email address" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" required aria-label="Email address">
-                            <input type="password" id="passwordInput" placeholder="Choose a password" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" required aria-label="Password">
-                            <button type="submit" id="signupButton" class="bg-indigo-800 text-yellow-400 font-bold py-3 rounded-md hover:bg-indigo-700 transition focus:outline-none flex justify-center items-center">
-                                <span id="signup-button-text">Create Account</span>
-                                <div id="signup-loader" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-yellow-400 ml-3"></div>
-                            </button>
-                            <p id="formMessage" class="mt-2 font-semibold h-5" role="alert"></p>
-                        </form>
-                        <hr class="my-6 border-gray-300 dark:border-gray-600">
-                        <form id="signinForm" class="flex flex-col space-y-4" novalidate>
-                            <input type="email" id="signinEmailInput" placeholder="Email address" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-indigo-400" required aria-label="Email address">
-                            <input type="password" id="signinPasswordInput" placeholder="Password" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-indigo-400" required aria-label="Password">
-                            <button type="submit" id="signinButton" class="bg-indigo-600 text-white font-bold py-3 rounded-md hover:bg-indigo-500 transition focus:outline-none flex justify-center items-center">
-                                <span id="signin-button-text">Sign In</span>
-                                <div id="signin-loader" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-white ml-3"></div>
-                            </button>
-                            <p id="signinFormMessage" class="mt-2 font-semibold h-5" role="alert"></p>
-                        </form>
-                    `;
-                    document.getElementById('signupForm')?.addEventListener('submit', handleSignup);
-                    document.getElementById('signinForm')?.addEventListener('submit', handleSignin);
-                }
+                showSignupForm();
             }
             setLockedState(!isFullUser);
+        };
+
         // Sign in handler
         const handleSignin = async (e) => {
             e.preventDefault();
@@ -567,6 +591,68 @@
                 if (signinButton) signinButton.disabled = false;
             }
         };
+
+        // Forgot password handler
+        const handleForgotPassword = async () => {
+            console.log('Forgot password clicked');
+            const emailInput = document.getElementById('signinEmailInput');
+            const email = emailInput?.value?.trim() || '';
+            
+            console.log('Email entered:', email);
+            
+            if (!email) {
+                alert('Please enter your email address first.');
+                emailInput?.focus();
+                return;
+            }
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+            
+            console.log('Auth object:', auth);
+            console.log('sendPasswordResetEmail function:', sendPasswordResetEmail);
+            
+            try {
+                if (!auth) {
+                    console.error('Auth not initialized');
+                    throw new Error('Auth not initialized');
+                }
+                
+                console.log('Sending password reset email to:', email);
+                
+                // Add action code settings for better email handling
+                const actionCodeSettings = {
+                    url: window.location.origin, // Use current domain as the continue URL
+                    handleCodeInApp: false
+                };
+                
+                await sendPasswordResetEmail(auth, email, actionCodeSettings);
+                console.log('Password reset email sent successfully');
+                alert('Password reset email sent! Check your inbox (and spam folder) for instructions to reset your password.');
+            } catch (error) {
+                console.error('Password reset error:', error);
+                console.error('Error code:', error?.code);
+                console.error('Error message:', error?.message);
+                
+                const code = error?.code || '';
+                if (code === 'auth/user-not-found') {
+                    // For security, we show a generic message but still log the actual error
+                    console.log('User not found, showing generic message');
+                    alert('If an account with this email exists, you will receive a password reset email shortly.');
+                } else if (code === 'auth/invalid-email') {
+                    alert('Please enter a valid email address.');
+                } else if (code === 'auth/too-many-requests') {
+                    alert('Too many password reset attempts. Please wait a few minutes before trying again.');
+                } else if (code === 'auth/network-request-failed') {
+                    alert('Network error. Please check your internet connection and try again.');
+                } else {
+                    alert(`Unable to send password reset email: ${error?.message || 'Unknown error'}. Please try again later.`);
+                }
+            }
         };
 
         // --- Import Firebase (from CDN) ---
@@ -575,6 +661,8 @@
             getAuth,
             onAuthStateChanged,
             createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            sendPasswordResetEmail,
             signOut,
             signInWithCustomToken,
             signInAnonymously
@@ -662,7 +750,14 @@
         document.getElementById('nav-explorer-btn')?.addEventListener('click', () => window.scrollToSection('explorer-section'));
         document.getElementById('nav-practice-btn')?.addEventListener('click', () => window.scrollToSection('practice-section'));
         document.getElementById('hero-get-started')?.addEventListener('click', () => window.scrollToSection('signup'));
-        navSignupBtn?.addEventListener('click', () => window.scrollToSection('signup'));
+        navSigninBtn?.addEventListener('click', () => { 
+            window.scrollToSection('signup'); 
+            setTimeout(() => showSigninForm(), 100); 
+        });
+        navSignupBtn?.addEventListener('click', () => { 
+            window.scrollToSection('signup'); 
+            setTimeout(() => showSignupForm(), 100); 
+        });
 
         // --- Guard helpers for gated features ---
         function runIfFullUser(action) {
