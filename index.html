@@ -142,8 +142,15 @@
 
         <!-- Placeholder Sections -->
         <section id="repertoire-hub-section" class="container mx-auto px-6 py-12 bg-gray-200 dark:bg-gray-800 rounded-lg my-8">
-            <h2 class="text-3xl font-extrabold mb-4 text-gray-800 dark:text-yellow-400 text-center">Repertoire Hub</h2>
-            <p class="text-center max-w-lg mx-auto text-gray-800 dark:text-gray-300">This is where your full, searchable list of openings will live. Sign up to build your custom repertoire!</p>
+            <h2 class="text-3xl font-extrabold mb-8 text-gray-800 dark:text-yellow-400 text-center">Repertoire Hub</h2>
+            <div class="max-w-4xl mx-auto">
+                <div class="mb-6">
+                    <input type="search" id="repertoireSearch" placeholder="Search openings by name or ECO code..." class="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div id="repertoireList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Openings will be dynamically inserted here -->
+                </div>
+            </div>
         </section>
 
         <section id="explorer-section" class="container mx-auto px-6 py-12">
@@ -157,15 +164,21 @@
                 <p id="opening-info" class="text-gray-800 dark:text-gray-300 mb-4">
                     Watch a demonstration of a popular opening! Click the button to see the moves.
                 </p>
-                <button id="animate-opening-btn" class="bg-indigo-600 text-white font-bold px-6 py-2 rounded-lg shadow-md hover:bg-indigo-500 transition">
-                    Play Ruy Lopez Opening
-                </button>
+                <div class="flex items-center justify-center space-x-4">
+                    <button id="prevMoveBtn" class="bg-gray-600 text-white font-bold px-4 py-2 rounded-lg shadow-md hover:bg-gray-500 transition" disabled>< Prev</button>
+                    <button id="animate-opening-btn" class="bg-indigo-600 text-white font-bold px-6 py-2 rounded-lg shadow-md hover:bg-indigo-500 transition">
+                        Play Ruy Lopez Opening
+                    </button>
+                    <button id="nextMoveBtn" class="bg-gray-600 text-white font-bold px-4 py-2 rounded-lg shadow-md hover:bg-gray-500 transition" disabled>Next ></button>
+                </div>
             </div>
         </section>
 
         <section id="practice-section" class="container mx-auto px-6 py-12 bg-gray-200 dark:bg-gray-800 rounded-lg my-8">
-            <h2 class="text-3xl font-extrabold mb-4 text-gray-800 dark:text-yellow-400 text-center">Practice Modes</h2>
-            <p class="text-center max-w-lg mx-auto text-gray-800 dark:text-gray-300">Learn, drill, and test your knowledge with timed trials and puzzles right here.</p>
+            <h2 class="text-3xl font-extrabold mb-8 text-gray-800 dark:text-yellow-400 text-center">Practice Modes</h2>
+            <div id="practiceDrill" class="max-w-2xl mx-auto bg-white dark:bg-gray-700 p-6 rounded-lg shadow">
+                <!-- Practice drill content will be inserted here -->
+            </div>
         </section>
 
         <!-- Signup Section -->
@@ -1055,6 +1068,184 @@
             console.log(allPass ? 'All checks passed.' : 'Some checks failed. See above.');
             console.groupEnd();
         })();
+
+        // --- Repertoire Hub Logic ---
+        const openingRepertoire = [
+            { eco: 'A00', name: 'Anderssen\'s Opening', pgn: '1. a3' },
+            { eco: 'A40', name: 'Queen\'s Pawn Game', pgn: '1. d4' },
+            { eco: 'B00', name: 'King\'s Pawn Opening', pgn: '1. e4' },
+            { eco: 'B01', name: 'Scandinavian Defense', pgn: '1. e4 d5' },
+            { eco: 'B20', name: 'Sicilian Defense', pgn: '1. e4 c5' },
+            { eco: 'C00', name: 'French Defense', pgn: '1. e4 e6' },
+            { eco: 'C20', name: 'King\'s Pawn Game', pgn: '1. e4 e5' },
+            { eco: 'C41', name: 'Philidor Defense', pgn: '1. e4 e5 2. Nf3 d6' },
+            { eco: 'C50', name: 'Italian Game', pgn: '1. e4 e5 2. Nf3 Nc6 3. Bc4' },
+            { eco: 'D00', name: 'Queen\'s Pawn Game', pgn: '1. d4 d5' },
+            { eco: 'D06', name: 'Queen\'s Gambit', pgn: '1. d4 d5 2. c4' },
+            { eco: 'E60', name: 'King\'s Indian Defense', pgn: '1. d4 Nf6 2. c4 g6' },
+        ];
+
+        function renderRepertoire(filter = '') {
+            const listElement = document.getElementById('repertoireList');
+            if (!listElement) return;
+
+            const lowerFilter = filter.toLowerCase();
+            const filteredOpenings = openingRepertoire.filter(op =>
+                op.name.toLowerCase().includes(lowerFilter) ||
+                op.eco.toLowerCase().includes(lowerFilter)
+            );
+
+            if (filteredOpenings.length === 0) {
+                listElement.innerHTML = `<p class="text-gray-500 dark:text-gray-400 col-span-full text-center">No openings found.</p>`;
+                return;
+            }
+
+            listElement.innerHTML = filteredOpenings.map(op => `
+                <div class="bg-white dark:bg-gray-700 p-4 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer" data-pgn="${op.pgn}" data-name="${op.name}">
+                    <h4 class="font-bold text-lg text-gray-900 dark:text-yellow-400">${op.name}</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">${op.eco}</p>
+                    <code class="text-sm text-gray-500 dark:text-gray-400 block mt-2">${op.pgn}</code>
+                </div>
+            `).join('');
+
+            // Add click listeners to the new repertoire items
+            listElement.querySelectorAll('[data-pgn]').forEach(el => {
+                el.addEventListener('click', () => {
+                    const pgn = el.dataset.pgn;
+                    const name = el.dataset.name;
+                    loadOpeningOnExplorer(name, pgn);
+                    scrollToSection('explorer-section');
+                });
+            });
+        }
+
+        // Initial render and search listener
+        (function initRepertoire() {
+            renderRepertoire();
+            const searchInput = document.getElementById('repertoireSearch');
+            searchInput?.addEventListener('input', (e) => renderRepertoire(e.target.value));
+        })();
+
+        // --- Explorer Board Logic ---
+        let currentOpening = { name: 'Ruy Lopez', pgn: '1. e4 e5 2. Nf3 Nc6 3. Bb5' };
+        let currentMoveIndex = 0;
+        let boardStates = []; // Will hold FEN-like board states for the current opening
+
+        // This is a simplified PGN to board state converter. A real app would use a full chess library.
+        function generateBoardStatesFromPgn(pgn) {
+            // This is a mock function. A real implementation would require a full chess engine
+            // to correctly generate board states (FENs) from PGN moves.
+            // For now, we'll just use the hardcoded Ruy Lopez sequence if it matches.
+            if (pgn.includes('Bb5')) {
+                return ruyLopezSequence.map(s => s.pos);
+            }
+            // Return a simple sequence for other openings for demonstration
+            return [
+                ['rnbqkbnr','pppppppp','........','........','........','........','PPPPPPPP','RNBQKBNR'],
+                ['rnbqkbnr','pppppppp','........','........','....P...','........','PPPP.PPP','RNBQKBNR'],
+            ];
+        }
+
+        function updateExplorerUI() {
+            renderBoard(boardStates[currentMoveIndex]);
+            openingInfo.textContent = `${currentOpening.name} - Move ${currentMoveIndex}`;
+            document.getElementById('prevMoveBtn').disabled = currentMoveIndex === 0;
+            document.getElementById('nextMoveBtn').disabled = currentMoveIndex === boardStates.length - 1;
+        }
+
+        function loadOpeningOnExplorer(name, pgn) {
+            currentOpening = { name, pgn };
+            boardStates = generateBoardStatesFromPgn(pgn);
+            currentMoveIndex = 0;
+            updateExplorerUI();
+        }
+
+        document.getElementById('prevMoveBtn')?.addEventListener('click', () => {
+            if (currentMoveIndex > 0) {
+                currentMoveIndex--;
+                updateExplorerUI();
+            }
+        });
+
+        document.getElementById('nextMoveBtn')?.addEventListener('click', () => {
+            if (currentMoveIndex < boardStates.length - 1) {
+                currentMoveIndex++;
+                updateExplorerUI();
+            }
+        });
+
+        // Initial load
+        loadOpeningOnExplorer(currentOpening.name, currentOpening.pgn);
+
+        // --- Practice Mode Logic ---
+        const practiceDrills = [
+            {
+                name: 'Name the Opening',
+                board: ['r.bqkbnr','pppp.ppp','..n.....','.B..p...','....P...','.....N..','PPPP.PPP','RNBQK..R'], // Ruy Lopez
+                question: 'Which opening is shown on the board?',
+                options: ['Sicilian Defense', 'Ruy Lopez', 'Queen\'s Gambit'],
+                answer: 'Ruy Lopez'
+            },
+            {
+                name: 'Name the Opening',
+                board: ['rnbqkbnr','pppp.ppp','........','....p...','....P...','........','PPPP.PPP','RNBQKBNR'], // King's Pawn
+                question: 'Which opening is shown on the board?',
+                options: ['King\'s Pawn Opening', 'French Defense', 'Italian Game'],
+                answer: 'King\'s Pawn Opening'
+            }
+        ];
+        let currentDrillIndex = 0;
+
+        function loadPracticeDrill(index) {
+            const drill = practiceDrills[index];
+            const drillContainer = document.getElementById('practiceDrill');
+            if (!drillContainer) return;
+
+            const optionsHtml = drill.options.map(opt =>
+                `<button class="w-full text-left p-3 bg-gray-100 dark:bg-gray-600 rounded-md hover:bg-indigo-100 dark:hover:bg-indigo-500" data-answer="${opt}">${opt}</button>`
+            ).join('');
+
+            drillContainer.innerHTML = `
+                <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-yellow-400">${drill.name}</h3>
+                <div class="flex justify-center mb-4">
+                    <div id="practiceBoard" class="chessboard" style="width: 250px; height: 250px; font-size: 24px;"></div>
+                </div>
+                <p class="text-center mb-4 font-semibold text-gray-800 dark:text-gray-300">${drill.question}</p>
+                <div class="space-y-2">${optionsHtml}</div>
+                <p id="drillFeedback" class="mt-4 font-semibold h-5"></p>
+                <button id="nextDrillBtn" class="mt-4 w-full bg-indigo-600 text-white font-bold py-2 rounded-md hover:bg-indigo-500 transition hidden">Next Drill</button>
+            `;
+
+            // Render the practice board
+            const practiceBoard = document.getElementById('practiceBoard');
+            const originalBoardElement = boardElement; // Temporarily store the main board
+            boardElement = practiceBoard; // Point renderBoard to the practice board
+            renderBoard(drill.board);
+            boardElement = originalBoardElement; // Restore the main board element
+
+            drillContainer.querySelectorAll('[data-answer]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const selectedAnswer = button.dataset.answer;
+                    const feedbackEl = document.getElementById('drillFeedback');
+                    if (selectedAnswer === drill.answer) {
+                        feedbackEl.textContent = 'Correct!';
+                        feedbackEl.className = 'mt-4 font-semibold text-green-600 dark:text-green-400';
+                    } else {
+                        feedbackEl.textContent = `Not quite. The correct answer is ${drill.answer}.`;
+                        feedbackEl.className = 'mt-4 font-semibold text-red-600 dark:text-red-400';
+                    }
+                    document.getElementById('nextDrillBtn').classList.remove('hidden');
+                });
+            });
+
+            document.getElementById('nextDrillBtn')?.addEventListener('click', () => {
+                currentDrillIndex = (currentDrillIndex + 1) % practiceDrills.length;
+                loadPracticeDrill(currentDrillIndex);
+            });
+        }
+
+        // Initial load
+        loadPracticeDrill(currentDrillIndex);
     </script>
     <!-- Keep your entire original index.html content here -->
 ...
