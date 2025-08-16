@@ -583,7 +583,9 @@
                 else if (code === 'auth/user-not-found') formMessage.textContent = 'No account found for this email.';
                 else if (code === 'auth/wrong-password') formMessage.textContent = 'Incorrect password.';
                 else if (String(error?.message || '').includes('Auth not initialized')) formMessage.textContent = 'Firebase is not initialized — check the config at the top of index.html.';
-                else formMessage.textContent = 'Sign in failed. Open the browser console for details.';
+                else formMessage.textContent = 'Your email or password is incorrect';
+
+                
                 formMessage.className = 'mt-2 font-semibold text-red-600';
             } finally {
                 signinButtonText?.classList.remove('hidden');
