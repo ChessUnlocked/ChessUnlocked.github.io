@@ -533,18 +533,30 @@
                 navSigninBtn?.classList.add('hidden');
                 navSignupBtn?.classList.add('hidden');
                 navSignoutBtn?.classList.remove('hidden');
-                if (signupCard) {
-                    const emailText = user?.email || 'User';
-                    signupCard.innerHTML = `
-                        <h2 class="text-3xl font-extrabold mb-6 text-green-600 dark:text-green-400">Welcome back!</h2>
-                        <p class="text-gray-700 dark:text-gray-300">You're all set. Start exploring the features above or sign out.</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">Signed in as ${emailText}</p>
-                    `;
+                
+                // Hide the entire signup section and show user content
+                const signupSection = document.getElementById('signup');
+                if (signupSection) signupSection.classList.add('hidden');
+
+                // This is a placeholder for where user-specific content would go.
+                // For now, we'll just show a welcome message in the main part of the page.
+                // A real app would have a #user-content section to show here.
+                const emailText = user?.email || 'User';
+                const welcomeMessage = `Welcome back, ${emailText}! You can now access all features.`;
+                // For demonstration, let's reuse the repertoire hub to show the message.
+                const repertoireHub = document.getElementById('repertoire-hub-section');
+                if(repertoireHub) {
+                    repertoireHub.querySelector('p').textContent = welcomeMessage;
                 }
+
             } else {
                 navSigninBtn?.classList.remove('hidden');
                 navSignupBtn?.classList.remove('hidden');
                 navSignoutBtn?.classList.add('hidden');
+                
+                const signupSection = document.getElementById('signup');
+                if (signupSection) signupSection.classList.remove('hidden');
+                
                 showSignupForm();
             }
             setLockedState(!isFullUser);
@@ -768,23 +780,29 @@
             if (user.isAnonymous) { openModal('Feature locked', 'This feature requires a full account. Please sign up or sign in to unlock it.'); return; }
             action();
         }
-        function guardedOpenModal(title, lockedText) {
+        function guardedOpenModal(title, contentGenerator) {
             const user = auth?.currentUser;
-            if (user && !user.isAnonymous) openModal(title, `Welcome! ${title} is now available for your account.`);
-            else openModal(title, lockedText + ' Sign up to unlock this feature.');
+            if (user && !user.isAnonymous) {
+                // If the user is signed in, call the content generator function
+                // which will be responsible for populating and opening the modal.
+                contentGenerator();
+            } else {
+                // If the user is not signed in, show the generic "feature locked" modal.
+                openModal(title, 'This feature requires a full account. Please sign up or sign in to unlock it.');
+            }
         }
         function guardedOpenRecommendationModal() { runIfFullUser(() => openRecommendationModal()); }
 
         // Attach clicks for gated items
         document.getElementById('recommendations')?.addEventListener('click', guardedOpenRecommendationModal);
         document.getElementById('customization')?.addEventListener('click', () =>
-            guardedOpenModal('Customization', 'This feature will allow you to change board colors, piece styles, and more. Sign up to be notified!')
+            guardedOpenModal('Customization', openCustomizationModal)
         );
         document.getElementById('analysis')?.addEventListener('click', () =>
-            guardedOpenModal('Game Analysis', 'Upload your PGN files to get instant feedback on your opening play. Sign up to get access!')
+            guardedOpenModal('Game Analysis', openGameAnalysisModal)
         );
         document.getElementById('stats')?.addEventListener('click', () =>
-            guardedOpenModal('Performance Stats', 'Track your accuracy and mastery level for each opening in your repertoire. Sign up to start tracking!')
+            guardedOpenModal('Performance Stats', openPerformanceStatsModal)
         );
 
         // Keyboard activation on feature cards
@@ -793,6 +811,83 @@
                 if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); el.click(); }
             });
         });
+
+        // --- Customization Modal Logic ---
+        function openCustomizationModal() {
+            // For now, this is a placeholder. In a real app, you would have UI elements
+            // to change themes, board colors, etc., and save these preferences.
+            const customizationContent = `
+                <p>Here you can customize your experience:</p>
+                <ul class="list-disc list-inside mt-4 space-y-2">
+                    <li>Board theme (e.g., Wood, Marble, Oceanic)</li>
+                    <li>Piece style (e.g., Classic, Modern, Minimalist)</li>
+                    <li>Sound effects volume</li>
+                </ul>
+                <p class="mt-4 text-sm text-gray-500">These settings will be saved to your account.</p>
+            `;
+            modalTitle.textContent = '🎨 Customization';
+            modalDescription.innerHTML = customizationContent;
+            featureModal.classList.remove('hidden');
+            featureModal.setAttribute('aria-hidden', 'false');
+        }
+
+        // --- Performance Stats Modal Logic ---
+        function openPerformanceStatsModal() {
+            const statsContent = `
+                <p>Here are your performance statistics:</p>
+                <div class="mt-4 space-y-2">
+                    <div>
+                        <strong>Ruy Lopez:</strong>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                            <div class="bg-green-600 h-2.5 rounded-full" style="width: 85%"></div>
+                        </div>
+                        <p class="text-sm text-right">85% Mastery</p>
+                    </div>
+                    <div>
+                        <strong>Sicilian Defense:</strong>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                            <div class="bg-yellow-400 h-2.5 rounded-full" style="width: 60%"></div>
+                        </div>
+                        <p class="text-sm text-right">60% Mastery</p>
+                    </div>
+                    <div>
+                        <strong>Queen's Gambit:</strong>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                            <div class="bg-red-600 h-2.5 rounded-full" style="width: 30%"></div>
+                        </div>
+                        <p class="text-sm text-right">30% Mastery</p>
+                    </div>
+                </div>
+            `;
+            modalTitle.textContent = '📊 Performance Stats';
+            modalDescription.innerHTML = statsContent;
+            featureModal.classList.remove('hidden');
+            featureModal.setAttribute('aria-hidden', 'false');
+        }
+
+        // --- Game Analysis Modal Logic ---
+        function openGameAnalysisModal() {
+            const analysisContent = `
+                <p>Upload a PGN file of your game to receive an analysis of your opening.</p>
+                <div class="mt-4">
+                    <label for="pgn-upload" class="block text-sm font-medium text-gray-700 dark:text-gray-300">PGN File:</label>
+                    <input type="file" id="pgn-upload" name="pgn-upload" accept=".pgn" class="mt-1 block w-full text-sm text-gray-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-full file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-indigo-50 file:text-indigo-700
+                        hover:file:bg-indigo-100
+                    "/>
+                </div>
+                <button id="analyze-game-btn" class="mt-6 w-full bg-indigo-800 text-yellow-400 font-bold py-3 rounded-md hover:bg-indigo-700 transition focus:outline-none">
+                    Analyze Game
+                </button>
+            `;
+            modalTitle.textContent = '📈 Game Analysis';
+            modalDescription.innerHTML = analysisContent;
+            featureModal.classList.remove('hidden');
+            featureModal.setAttribute('aria-hidden', 'false');
+        }
 
         // --- Recommendation button click (calls Gemini with browser fetch)
         getRecommendationBtn?.addEventListener('click', async () => {
