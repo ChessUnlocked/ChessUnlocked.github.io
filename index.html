@@ -13,6 +13,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
+    <!-- PGN Parser Library -->
+    <script src="https://cdn.jsdelivr.net/npm/pgn-parser@1.1.0/pgn-parser.js"></script>
+
     <style>
         /* Custom styles */
         body { font-family: 'Inter', sans-serif; }
@@ -813,65 +816,164 @@
         });
 
         // --- Customization Modal Logic ---
+        const boardThemes = {
+            classic: { light: '#f0d9b5', dark: '#b58863', border: '#6b3d25' },
+            marble: { light: '#e0e0e0', dark: '#a0a0a0', border: '#424242' },
+            ocean: { light: '#cce7f5', dark: '#6b9ac4', border: '#3b5998' },
+            forest: { light: '#d1e7dd', dark: '#8fbc8f', border: '#2e8b57' },
+        };
+
+        function applyBoardTheme(themeName) {
+            const theme = boardThemes[themeName];
+            if (!theme || !boardElement) return;
+
+            boardElement.style.borderColor = theme.border;
+            document.querySelectorAll('.light-square').forEach(sq => sq.style.backgroundColor = theme.light);
+            document.querySelectorAll('.dark-square').forEach(sq => sq.style.backgroundColor = theme.dark);
+            
+            try {
+                localStorage.setItem('boardTheme', themeName);
+            } catch (e) {
+                console.warn('Could not save board theme to localStorage', e);
+            }
+        }
+
         function openCustomizationModal() {
-            // For now, this is a placeholder. In a real app, you would have UI elements
-            // to change themes, board colors, etc., and save these preferences.
+            const currentTheme = localStorage.getItem('boardTheme') || 'classic';
+            const optionsHtml = Object.keys(boardThemes).map(themeName =>
+                `<option value="${themeName}" ${currentTheme === themeName ? 'selected' : ''}>
+                    ${themeName.charAt(0).toUpperCase() + themeName.slice(1)}
+                </option>`
+            ).join('');
+
             const customizationContent = `
-                <p>Here you can customize your experience:</p>
-                <ul class="list-disc list-inside mt-4 space-y-2">
-                    <li>Board theme (e.g., Wood, Marble, Oceanic)</li>
-                    <li>Piece style (e.g., Classic, Modern, Minimalist)</li>
-                    <li>Sound effects volume</li>
-                </ul>
-                <p class="mt-4 text-sm text-gray-500">These settings will be saved to your account.</p>
+                <div class="space-y-4">
+                    <div>
+                        <label for="boardThemeSelector" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Board Theme:</label>
+                        <select id="boardThemeSelector" class="mt-1 block w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Your selection is saved automatically.</p>
+                </div>
             `;
             modalTitle.textContent = '🎨 Customization';
             modalDescription.innerHTML = customizationContent;
             featureModal.classList.remove('hidden');
             featureModal.setAttribute('aria-hidden', 'false');
+
+            // Add event listener after the modal is populated
+            const themeSelector = document.getElementById('boardThemeSelector');
+            themeSelector?.addEventListener('change', (e) => {
+                applyBoardTheme(e.target.value);
+            });
         }
 
+        // Apply saved theme on initial load
+        (function initBoardTheme() {
+            try {
+                const savedTheme = localStorage.getItem('boardTheme');
+                if (savedTheme && boardThemes[savedTheme]) {
+                    applyBoardTheme(savedTheme);
+                }
+            } catch (e) {
+                console.warn('Could not load board theme from localStorage', e);
+            }
+        })();
+
         // --- Performance Stats Modal Logic ---
+        function getPerformanceStats() {
+            // In a real app, this data would come from Firestore.
+            // We'll use localStorage to simulate persistence.
+            try {
+                const stats = localStorage.getItem('performanceStats');
+                if (stats) {
+                    return JSON.parse(stats);
+                }
+            } catch (e) { console.warn('Could not parse performance stats', e); }
+            
+            // Default stats if none are saved
+            return {
+                'Ruy Lopez': 85,
+                'Sicilian Defense': 60,
+                "Queen's Gambit": 30,
+            };
+        }
+
+        function savePerformanceStats(stats) {
+            try {
+                localStorage.setItem('performanceStats', JSON.stringify(stats));
+            } catch (e) { console.warn('Could not save performance stats', e); }
+        }
+
         function openPerformanceStatsModal() {
+            const stats = getPerformanceStats();
+            const statsHtml = Object.entries(stats).map(([opening, mastery]) => {
+                const color = mastery > 80 ? 'bg-green-600' : mastery > 50 ? 'bg-yellow-400' : 'bg-red-600';
+                return `
+                    <div>
+                        <strong>${opening}:</strong>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                            <div class="${color} h-2.5 rounded-full" style="width: ${mastery}%"></div>
+                        </div>
+                        <p class="text-sm text-right">${mastery}% Mastery</p>
+                    </div>
+                `;
+            }).join('');
+
             const statsContent = `
                 <p>Here are your performance statistics:</p>
                 <div class="mt-4 space-y-2">
-                    <div>
-                        <strong>Ruy Lopez:</strong>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                            <div class="bg-green-600 h-2.5 rounded-full" style="width: 85%"></div>
-                        </div>
-                        <p class="text-sm text-right">85% Mastery</p>
-                    </div>
-                    <div>
-                        <strong>Sicilian Defense:</strong>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                            <div class="bg-yellow-400 h-2.5 rounded-full" style="width: 60%"></div>
-                        </div>
-                        <p class="text-sm text-right">60% Mastery</p>
-                    </div>
-                    <div>
-                        <strong>Queen's Gambit:</strong>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                            <div class="bg-red-600 h-2.5 rounded-full" style="width: 30%"></div>
-                        </div>
-                        <p class="text-sm text-right">30% Mastery</p>
-                    </div>
+                    ${statsHtml}
                 </div>
+                <button id="resetStatsBtn" class="mt-6 text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Reset Stats</button>
             `;
             modalTitle.textContent = '📊 Performance Stats';
             modalDescription.innerHTML = statsContent;
             featureModal.classList.remove('hidden');
             featureModal.setAttribute('aria-hidden', 'false');
+
+            document.getElementById('resetStatsBtn')?.addEventListener('click', () => {
+                try { localStorage.removeItem('performanceStats'); } catch(e) {}
+                closeModal();
+                openPerformanceStatsModal(); // Re-open to show default stats
+            });
         }
 
         // --- Game Analysis Modal Logic ---
+        function handlePgnUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const pgnText = e.target.result;
+                try {
+                    const [parsed] = pgnParser.parse(pgnText);
+                    if (!parsed) throw new Error('Invalid PGN data');
+                    
+                    const moves = parsed.moves.map(move => move.move).join(' ');
+                    const analysisResult = `
+                        <h4 class="font-bold text-lg">Game Found:</h4>
+                        <p class="text-sm text-gray-500">${parsed.headers.White} vs ${parsed.headers.Black} (${parsed.headers.Date})</p>
+                        <p class="mt-2 font-mono bg-gray-100 dark:bg-gray-700 p-2 rounded text-sm">${moves}</p>
+                        <p class="mt-4 text-green-600 dark:text-green-400"><strong>Analysis:</strong> This looks like a solid game! (Full analysis engine coming soon).</p>
+                    `;
+                    document.getElementById('analysisResult').innerHTML = analysisResult;
+
+                } catch (err) {
+                    document.getElementById('analysisResult').innerHTML = `<p class="text-red-500">Error parsing PGN: ${err.message}</p>`;
+                }
+            };
+            reader.readAsText(file);
+        }
+
         function openGameAnalysisModal() {
             const analysisContent = `
                 <p>Upload a PGN file of your game to receive an analysis of your opening.</p>
                 <div class="mt-4">
-                    <label for="pgn-upload" class="block text-sm font-medium text-gray-700 dark:text-gray-300">PGN File:</label>
-                    <input type="file" id="pgn-upload" name="pgn-upload" accept=".pgn" class="mt-1 block w-full text-sm text-gray-500
+                    <label for="pgnUpload" class="block text-sm font-medium text-gray-700 dark:text-gray-300">PGN File:</label>
+                    <input type="file" id="pgnUpload" accept=".pgn" class="mt-1 block w-full text-sm text-gray-500
                         file:mr-4 file:py-2 file:px-4
                         file:rounded-full file:border-0
                         file:text-sm file:font-semibold
@@ -879,14 +981,14 @@
                         hover:file:bg-indigo-100
                     "/>
                 </div>
-                <button id="analyze-game-btn" class="mt-6 w-full bg-indigo-800 text-yellow-400 font-bold py-3 rounded-md hover:bg-indigo-700 transition focus:outline-none">
-                    Analyze Game
-                </button>
+                <div id="analysisResult" class="mt-4"></div>
             `;
             modalTitle.textContent = '📈 Game Analysis';
             modalDescription.innerHTML = analysisContent;
             featureModal.classList.remove('hidden');
             featureModal.setAttribute('aria-hidden', 'false');
+
+            document.getElementById('pgnUpload')?.addEventListener('change', handlePgnUpload);
         }
 
         // --- Recommendation button click (calls Gemini with browser fetch)
