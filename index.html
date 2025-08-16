@@ -765,21 +765,24 @@
                 console.error('Sign Out Error', error);
                 openModal('Sign Out Failed', 'There was a problem signing you out. Please try again.');
             });
+            // On sign out, revert to the default theme
+            applyBoardTheme('classic');
         });
 
         // --- Smooth Scrolling helpers ---
-        window.scrollToSection = (id) => {
-            const el = document.getElementById(id);
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const scrollToSection = (selector) => {
+            const element = document.querySelector(selector);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         };
-        window.scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
         // Attach nav + header listeners
-        document.getElementById('site-title')?.addEventListener('click', () => window.scrollToTop());
-        document.getElementById('nav-repertoire-btn')?.addEventListener('click', () => window.scrollToSection('repertoire-hub-section'));
-        document.getElementById('nav-explorer-btn')?.addEventListener('click', () => window.scrollToSection('explorer-section'));
-        document.getElementById('nav-practice-btn')?.addEventListener('click', () => window.scrollToSection('practice-section'));
-        document.getElementById('hero-get-started')?.addEventListener('click', () => window.scrollToSection('signup'));
+        document.getElementById('site-title')?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        document.getElementById('nav-repertoire-btn')?.addEventListener('click', () => scrollToSection('#repertoire-hub-section'));
+        document.getElementById('nav-explorer-btn')?.addEventListener('click', () => scrollToSection('#explorer-section'));
+        document.getElementById('nav-practice-btn')?.addEventListener('click', () => scrollToSection('#practice-section'));
+        document.getElementById('hero-get-started')?.addEventListener('click', () => scrollToSection('#signup'));
         navSigninBtn?.addEventListener('click', () => { 
             window.scrollToSection('signup'); 
             setTimeout(() => showSigninForm(), 100); 
@@ -845,7 +848,14 @@
             document.querySelectorAll('.dark-square').forEach(sq => sq.style.backgroundColor = theme.dark);
             
             try {
-                localStorage.setItem('boardTheme', themeName);
+                const user = auth?.currentUser;
+                // If a user is signed in, save the theme to a user-specific key.
+                if (user && !user.isAnonymous) {
+                    localStorage.setItem(`boardTheme_${user.uid}`, themeName);
+                } else {
+                    // Fallback for anonymous or signed-out users (though it will be cleared on signout)
+                    localStorage.setItem('boardTheme', themeName);
+                }
             } catch (e) {
                 console.warn('Could not save board theme to localStorage', e);
             }
@@ -883,16 +893,23 @@
         }
 
         // Apply saved theme on initial load
-        (function initBoardTheme() {
+        // This function will be called when the user's auth state is known.
+        function loadUserBoardTheme(user) {
+            let savedTheme = 'classic'; // Default theme
             try {
-                const savedTheme = localStorage.getItem('boardTheme');
-                if (savedTheme && boardThemes[savedTheme]) {
-                    applyBoardTheme(savedTheme);
+                if (user && !user.isAnonymous) {
+                    // If a user is signed in, try to load their specific theme.
+                    const userTheme = localStorage.getItem(`boardTheme_${user.uid}`);
+                    if (userTheme && boardThemes[userTheme]) {
+                        savedTheme = userTheme;
+                    }
                 }
+                // No need for a fallback to the global theme, as it should be cleared on logout.
             } catch (e) {
                 console.warn('Could not load board theme from localStorage', e);
             }
-        })();
+            applyBoardTheme(savedTheme);
+        }
 
         // --- Performance Stats Modal Logic ---
         function getPerformanceStats() {
