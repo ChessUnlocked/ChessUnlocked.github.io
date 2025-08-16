@@ -1,25 +1,70 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Claude Flow generated files
-.claude/settings.local.json
-.mcp.json
-claude-flow.config.json
-.swarm/
-.hive-mind/
-memory/claude-flow-data.json
-memory/sessions/*
-!memory/sessions/README.md
-memory/agents/*
-!memory/agents/README.md
-coordination/memory_bank/*
-coordination/subtasks/*
-coordination/orchestration/*
-*.db
-*.db-journal
-*.db-wal
-*.sqlite
-*.sqlite-journal
-*.sqlite-wal
-claude-flow
-claude-flow.bat
-claude-flow.ps1
-hive-mind-prompt-*.txt
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Development files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# SPARC-generated files (development artifacts)
+docs/requirements-specification.md
+docs/use-cases-specification.md
+docs/algorithms-pseudocode.md
+docs/system-architecture.md
+docs/forgot-password-architecture.md
+docs/production-validation-report.md
+docs/api/
+docs/deployment/
+
+# Test files
+test-forgot-password.html
+tests/
+coverage/
+
+# Modular architecture files (keep original index.html for GitHub Pages)
+src/
+package.json
+package-lock.json
+vite.config.js
+vitest.config.js
+.eslintrc.js
+.prettierrc
+
+# Memory and coordination files
+memory/
+.claude-flow/
+.claude/
+.roo/
+.roomodes
+memory-bank.md
+coordination.md
+CLAUDE.md
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
