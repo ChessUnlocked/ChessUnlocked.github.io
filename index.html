@@ -374,9 +374,11 @@
             { pos: ['r.bqkbnr','pppp.ppp','..n.....','.B..p...','....P...','.....N..','PPPP.PPP','RNBQK..R'], move: '3. Bb5' },
         ];
         let animationInterval = null;
-        function renderBoard(position) {
-            if (!boardElement) return;
-            boardElement.innerHTML = '';
+        function renderBoard(position, targetElement) {
+            const board = targetElement || boardElement;
+            if (!board) return;
+            console.log(`Rendering board on element:`, board.id);
+            board.innerHTML = '';
             for (let row = 0; row < 8; row++) {
                 const rowStr = position[row];
                 for (let col = 0; col < 8; col++) {
@@ -392,7 +394,7 @@
                         pieceElement.style.color = isBlack ? '#1e293b' : '#f8fafc';
                         square.appendChild(pieceElement);
                     }
-                    boardElement.appendChild(square);
+                    board.appendChild(square);
                 }
             }
         }
@@ -1330,10 +1332,8 @@
 
             // Render the practice board
             const practiceBoard = document.getElementById('practiceBoard');
-            const originalBoardElement = boardElement; // Temporarily store the main board
-            boardElement = practiceBoard; // Point renderBoard to the practice board
-            renderBoard(drill.board);
-            boardElement = originalBoardElement; // Restore the main board element
+            console.log('Rendering practice board. Target element:', practiceBoard ? practiceBoard.id : 'Not Found');
+            renderBoard(drill.board, practiceBoard);
 
             drillContainer.querySelectorAll('[data-answer]').forEach(button => {
                 button.addEventListener('click', () => {
