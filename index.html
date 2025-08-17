@@ -557,6 +557,12 @@
             // Default to showing signup form
             showSignupForm();
             setLockedState(true);
+
+            // Show the "Get Started" button
+            const heroGetStartedBtn = document.getElementById('hero-get-started');
+            if (heroGetStartedBtn) {
+                heroGetStartedBtn.classList.remove('hidden');
+            }
         };
 
         const showSignedInUI = (user) => {
@@ -609,6 +615,16 @@
                 showSignupForm();
             }
             setLockedState(!isFullUser);
+
+            // Hide the "Get Started" button if the user is fully signed in
+            const heroGetStartedBtn = document.getElementById('hero-get-started');
+            if (heroGetStartedBtn) {
+                if (isFullUser) {
+                    heroGetStartedBtn.classList.add('hidden');
+                } else {
+                    heroGetStartedBtn.classList.remove('hidden');
+                }
+            }
         };
 
         // Sign in handler
@@ -994,11 +1010,24 @@
             featureModal.classList.remove('hidden');
             featureModal.setAttribute('aria-hidden', 'false');
 
-            document.getElementById('resetStatsBtn')?.addEventListener('click', () => {
-                try { localStorage.removeItem('performanceStats'); } catch(e) {}
-                closeModal();
-                openPerformanceStatsModal(); // Re-open to show default stats
-            });
+            const resetStatsBtn = document.getElementById('resetStatsBtn');
+            if (resetStatsBtn) {
+                resetStatsBtn.addEventListener('click', () => {
+                    try {
+                        // Reset to default stats
+                        const defaultStats = {
+                            'Ruy Lopez': 85,
+                            'Sicilian Defense': 60,
+                            "Queen's Gambit": 30,
+                        };
+                        savePerformanceStats(defaultStats);
+                    } catch (e) {
+                        console.warn('Could not reset performance stats', e);
+                    }
+                    closeModal();
+                    openPerformanceStatsModal(); // Re-open to show the updated stats
+                });
+            }
         }
 
         // --- Game Analysis Modal Logic ---
