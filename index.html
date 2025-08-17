@@ -141,7 +141,7 @@
         </section>
 
         <!-- Placeholder Sections -->
-        <section id="repertoire-hub-section" class="container mx-auto px-6 py-12 bg-gray-200 dark:bg-gray-800 rounded-lg my-8">
+        <section id="repertoire-hub-section" class="container mx-auto px-6 py-12 bg-gray-200 dark:bg-gray-800 rounded-lg my-8 hidden">
             <h2 class="text-3xl font-extrabold mb-8 text-gray-800 dark:text-yellow-400 text-center">Repertoire Hub</h2>
             <div class="max-w-4xl mx-auto">
                 <div class="mb-6">
@@ -153,7 +153,7 @@
             </div>
         </section>
 
-        <section id="explorer-section" class="container mx-auto px-6 py-12">
+        <section id="explorer-section" class="container mx-auto px-6 py-12 hidden">
             <h2 class="text-3xl font-extrabold mb-8 text-gray-800 dark:text-yellow-400 text-center">
                 Interactive Explorer Board
             </h2>
@@ -174,7 +174,7 @@
             </div>
         </section>
 
-        <section id="practice-section" class="container mx-auto px-6 py-12 bg-gray-200 dark:bg-gray-800 rounded-lg my-8">
+        <section id="practice-section" class="container mx-auto px-6 py-12 bg-gray-200 dark:bg-gray-800 rounded-lg my-8 hidden">
             <h2 class="text-3xl font-extrabold mb-8 text-gray-800 dark:text-yellow-400 text-center">Practice Modes</h2>
             <div id="practiceDrill" class="max-w-2xl mx-auto bg-white dark:bg-gray-700 p-6 rounded-lg shadow">
                 <!-- Practice drill content will be inserted here -->
@@ -542,6 +542,7 @@
             navSignoutBtn?.classList.add('hidden');
             
             // Hide premium sections
+            console.log('Hiding premium sections for signed-out user.');
             premiumSections.forEach(id => {
                 const section = document.getElementById(id);
                 if (section) {
@@ -577,6 +578,7 @@
                 }
 
                // Show premium sections
+                console.log('Showing premium sections for signed-in user.');
                 premiumSections.forEach(id => {
                     const section = document.getElementById(id);
                     if (section) {
