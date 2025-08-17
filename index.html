@@ -550,6 +550,10 @@
                 }
             });
 
+            // Show the signup section
+            const signupSection = document.getElementById('signup-section');
+            if (signupSection) signupSection.classList.remove('hidden');
+
             // Default to showing signup form
             showSignupForm();
             setLockedState(true);
@@ -563,7 +567,7 @@
                 navSignoutBtn?.classList.remove('hidden');
                 
                 // Hide the entire signup section and show user content
-                const signupSection = document.getElementById('signup');
+                const signupSection = document.getElementById('signup-section');
                 if (signupSection) signupSection.classList.add('hidden');
 
                 // This is a placeholder for where user-specific content would go.
