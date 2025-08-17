@@ -594,6 +594,14 @@
                 const signupSection = document.getElementById('signup');
                 if (signupSection) signupSection.classList.remove('hidden');
                 
+                // Explicitly hide premium sections for anonymous users
+                premiumSections.forEach(id => {
+                    const section = document.getElementById(id);
+                    if (section) {
+                        section.classList.add('hidden');
+                    }
+                });
+
                 showSignupForm();
             }
             setLockedState(!isFullUser);
