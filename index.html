@@ -795,20 +795,18 @@
         // --- Guard helpers for gated features ---
         function runIfFullUser(action) {
             const user = auth?.currentUser;
-            if (!user) { openModal('Sign in required', 'Please sign up or sign in to use this feature.'); return; }
-            if (user.isAnonymous) { openModal('Feature locked', 'This feature requires a full account. Please sign up or sign in to unlock it.'); return; }
-            action();
+            // At the time of the click, check the user's state
+            if (user && !user.isAnonymous) {
+                action();
+            } else {
+                // If not a full user, show the sign-in prompt and stop.
+                openModal('Feature Locked', 'This feature requires a full account. Please sign up or sign in to unlock it.');
+                // Ensure no further execution happens.
+                return;
+            }
         }
         function guardedOpenModal(title, contentGenerator) {
-            const user = auth?.currentUser;
-            if (user && !user.isAnonymous) {
-                // If the user is signed in, call the content generator function
-                // which will be responsible for populating and opening the modal.
-                contentGenerator();
-            } else {
-                // If the user is not signed in, show the generic "feature locked" modal.
-                openModal(title, 'This feature requires a full account. Please sign up or sign in to unlock it.');
-            }
+            runIfFullUser(contentGenerator);
         }
         function guardedOpenRecommendationModal() { runIfFullUser(() => openRecommendationModal()); }
 
