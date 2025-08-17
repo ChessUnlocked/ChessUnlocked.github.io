@@ -308,7 +308,7 @@
         const getRecommendationBtn = document.getElementById('getRecommendationBtn');
 
         // Explorer refs
-        const boardElement = document.getElementById('chessboard');
+        let boardElement = document.getElementById('chessboard');
         const openingInfo = document.getElementById('opening-info');
         const animateBtn = document.getElementById('animate-opening-btn');
 
@@ -781,9 +781,7 @@
             if (!auth) return;
             try {
                 // No server token on GitHub Pages; just go anonymous for onboarding
-                console.log('Attempting initial anonymous sign-in...');
                 await signInAnonymously(auth);
-                console.log('Anonymous sign-in successful.');
             } catch (error) {
                 console.error("Initial sign-in error:", error);
             }
@@ -792,13 +790,7 @@
         // --- Sign Out ---
         navSignoutBtn?.addEventListener('click', () => {
             if (!auth) return;
-            console.log('User clicked sign out. Signing out...');
-            signOut(auth).then(() => {
-                console.log('Sign out successful. Attempting to re-sign in anonymously...');
-                signInAnonymously(auth).catch(err => {
-                    console.error('Failed to sign in anonymously after sign out:', err);
-                });
-            }).catch((error) => {
+            signOut(auth).catch((error) => {
                 console.error('Sign Out Error', error);
                 openModal('Sign Out Failed', 'There was a problem signing you out. Please try again.');
             });
@@ -822,11 +814,11 @@
         document.getElementById('hero-get-started')?.addEventListener('click', () => scrollToSection('#signup-section'));
         navSigninBtn?.addEventListener('click', () => {
             scrollToSection('#signup-section');
-            setTimeout(() => showSigninForm(), 100);
+            setTimeout(showSigninForm, 100);
         });
         navSignupBtn?.addEventListener('click', () => {
             scrollToSection('#signup-section');
-            setTimeout(() => showSignupForm(), 100);
+            setTimeout(showSignupForm, 100);
         });
 
         // --- Guard helpers for gated features ---
