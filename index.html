@@ -182,7 +182,7 @@
         </section>
 
         <!-- Signup Section -->
-        <section id="signup" class="bg-gradient-signup py-16 px-6 text-indigo-900">
+        <section id="signup-section" class="bg-gradient-signup py-16 px-6 text-indigo-900">
             <div class="container mx-auto max-w-lg text-center">
                  <div id="signupCard" class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-10">
                     <div id="firebase-error" class="hidden text-red-500 font-bold mb-4"></div>
@@ -781,7 +781,9 @@
             if (!auth) return;
             try {
                 // No server token on GitHub Pages; just go anonymous for onboarding
+                console.log('Attempting initial anonymous sign-in...');
                 await signInAnonymously(auth);
+                console.log('Anonymous sign-in successful.');
             } catch (error) {
                 console.error("Initial sign-in error:", error);
             }
@@ -790,7 +792,13 @@
         // --- Sign Out ---
         navSignoutBtn?.addEventListener('click', () => {
             if (!auth) return;
-            signOut(auth).catch((error) => {
+            console.log('User clicked sign out. Signing out...');
+            signOut(auth).then(() => {
+                console.log('Sign out successful. Attempting to re-sign in anonymously...');
+                signInAnonymously(auth).catch(err => {
+                    console.error('Failed to sign in anonymously after sign out:', err);
+                });
+            }).catch((error) => {
                 console.error('Sign Out Error', error);
                 openModal('Sign Out Failed', 'There was a problem signing you out. Please try again.');
             });
@@ -811,14 +819,14 @@
         document.getElementById('nav-repertoire-btn')?.addEventListener('click', () => scrollToSection('#repertoire-hub-section'));
         document.getElementById('nav-explorer-btn')?.addEventListener('click', () => scrollToSection('#explorer-section'));
         document.getElementById('nav-practice-btn')?.addEventListener('click', () => scrollToSection('#practice-section'));
-        document.getElementById('hero-get-started')?.addEventListener('click', () => scrollToSection('#signup'));
-        navSigninBtn?.addEventListener('click', () => { 
-            window.scrollToSection('signup'); 
-            setTimeout(() => showSigninForm(), 100); 
+        document.getElementById('hero-get-started')?.addEventListener('click', () => scrollToSection('#signup-section'));
+        navSigninBtn?.addEventListener('click', () => {
+            scrollToSection('#signup-section');
+            setTimeout(() => showSigninForm(), 100);
         });
-        navSignupBtn?.addEventListener('click', () => { 
-            window.scrollToSection('signup'); 
-            setTimeout(() => showSignupForm(), 100); 
+        navSignupBtn?.addEventListener('click', () => {
+            scrollToSection('#signup-section');
+            setTimeout(() => showSignupForm(), 100);
         });
 
         // --- Guard helpers for gated features ---
