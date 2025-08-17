@@ -312,6 +312,9 @@
         const openingInfo = document.getElementById('opening-info');
         const animateBtn = document.getElementById('animate-opening-btn');
 
+        // --- Premium Content ---
+        const premiumSections = ['repertoire-hub-section', 'explorer-section', 'practice-section'];
+
         // --- Utility: Generic modal open/close ---
         function openModal(title, description) {
             modalTitle.textContent = title;
@@ -539,9 +542,12 @@
             navSignoutBtn?.classList.add('hidden');
             
             // Hide premium sections
-            document.getElementById('repertoire-hub-section').style.display = 'none';
-            document.getElementById('explorer-section').style.display = 'none';
-            document.getElementById('practice-section').style.display = 'none';
+            premiumSections.forEach(id => {
+                const section = document.getElementById(id);
+                if (section) {
+                    section.classList.add('hidden');
+                }
+            });
 
             // Default to showing signup form
             showSignupForm();
@@ -571,13 +577,16 @@
                 }
 
                // Show premium sections
-               document.getElementById('repertoire-hub-section').style.display = 'block';
-               document.getElementById('explorer-section').style.display = 'block';
-               document.getElementById('practice-section').style.display = 'block';
+                premiumSections.forEach(id => {
+                    const section = document.getElementById(id);
+                    if (section) {
+                        section.classList.remove('hidden');
+                    }
+                });
 
-            } else {
-                navSigninBtn?.classList.remove('hidden');
-                navSignupBtn?.classList.remove('hidden');
+             } else {
+                 navSigninBtn?.classList.remove('hidden');
+                 navSignupBtn?.classList.remove('hidden');
                 navSignoutBtn?.classList.add('hidden');
                 
                 const signupSection = document.getElementById('signup');
