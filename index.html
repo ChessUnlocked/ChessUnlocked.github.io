@@ -269,6 +269,29 @@
 
         // --- Helper: show a bottom-right ribbon with status info
         function setRibbon(text, color = 'bg-gray-900') {
+// --- Diagnostic: Check Gemini API key and endpoint on page load
+async function checkGeminiAPI() {
+    const testPrompt = {
+        contents: [{ role: 'user', parts: [{ text: 'Test connection.' }] }]
+    };
+    const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${encodeURIComponent(CONFIG.GEMINI_API_KEY)}`;
+    try {
+        const resp = await fetch(testUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(testPrompt)
+        });
+        if (!resp.ok) {
+            setRibbon(`Gemini API error: ${resp.status} ${resp.statusText}`, 'bg-red-700');
+            return;
+        }
+        setRibbon('Gemini API connection OK', 'bg-emerald-700');
+    } catch (err) {
+        setRibbon('Gemini API unreachable. Check your network or API key.', 'bg-red-700');
+    }
+}
+
+window.addEventListener('DOMContentLoaded', checkGeminiAPI);
             const el = document.getElementById('statusRibbon');
             if (!el) return;
             el.textContent = text;
