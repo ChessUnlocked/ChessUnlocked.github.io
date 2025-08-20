@@ -283,12 +283,12 @@ async function checkGeminiAPI() {
             body: JSON.stringify(testPrompt)
         });
         if (!resp.ok) {
-            setRibbon(`Gemini API error: ${resp.status} ${resp.statusText}`, 'bg-red-700');
+            console.error(`Gemini API error: ${resp.status} ${resp.statusText}`);
             return;
         }
-        setRibbon('Gemini API connection OK', 'bg-emerald-700');
+        console.log('Gemini API connection OK');
     } catch (err) {
-        setRibbon('Gemini API unreachable. Check your network or API key.', 'bg-red-700');
+        console.error('Gemini API unreachable. Check your network or API key.');
     }
 }
 
