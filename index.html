@@ -1107,14 +1107,24 @@
                 const payload = { contents: [{ role: 'user', parts: [{ text: prompt }] }] };
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${encodeURIComponent(CONFIG.GEMINI_API_KEY)}`;
 
-                const resp = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                let resp;
+                try {
+                    resp = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                } catch (networkErr) {
+                    throw new Error('Network error: Unable to reach Gemini API. Check your internet connection or API URL.');
+                }
 
-                if (!resp.ok) throw new Error(`Coach API HTTP ${resp.status}`);
-                const json = await resp.json();
+                if (!resp.ok) throw new Error(`Coach API HTTP ${resp.status} - ${resp.statusText}`);
+                let json;
+                try {
+                    json = await resp.json();
+                } catch (jsonErr) {
+                    throw new Error('Failed to parse response from Gemini API.');
+                }
                 const text = json?.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (!text) throw new Error('Coach returned no content');
 
