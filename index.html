@@ -224,8 +224,6 @@
         </div>
     </div>
 
-    <!-- Status ribbon (auto-updates with init results) -->
-    <div id="statusRibbon" class="ribbon hidden"></div>
 
     <!-- Firebase + App JS -->
     <script type="module">
@@ -246,35 +244,36 @@
 
         // --- Helper: show a bottom-right ribbon with status info
         function setRibbon(text, color = 'bg-gray-900') {
-// --- Diagnostic: Check Gemini API key and endpoint on page load
-async function checkGeminiAPI() {
-    const testPrompt = {
-        contents: [{ role: 'user', parts: [{ text: 'Test connection.' }] }]
-    };
-    const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${encodeURIComponent(CONFIG.GEMINI_API_KEY)}`;
-    try {
-        const resp = await fetch(testUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(testPrompt)
-        });
-        if (!resp.ok) {
-            console.error(`Gemini API error: ${resp.status} ${resp.statusText}`);
-            return;
-        }
-        console.log('Gemini API connection OK');
-    } catch (err) {
-        console.error('Gemini API unreachable. Check your network or API key.');
-    }
-}
-
-window.addEventListener('DOMContentLoaded', checkGeminiAPI);
             const el = document.getElementById('statusRibbon');
             if (!el) return;
             el.textContent = text;
             el.classList.remove('hidden', 'bg-red-700', 'bg-emerald-700', 'bg-yellow-700', 'bg-gray-900');
             el.classList.add(color);
         }
+
+        // --- Diagnostic: Check Gemini API key and endpoint on page load
+        async function checkGeminiAPI() {
+            const testPrompt = {
+                contents: [{ role: 'user', parts: [{ text: 'Test connection.' }] }]
+            };
+            const testUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${encodeURIComponent(CONFIG.GEMINI_API_KEY)}`;
+            try {
+                const resp = await fetch(testUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testPrompt)
+                });
+                if (!resp.ok) {
+                    console.error(`Gemini API error: ${resp.status} ${resp.statusText}`);
+                    return;
+                }
+                console.log('Gemini API connection OK');
+            } catch (err) {
+                console.error('Gemini API unreachable. Check your network or API key.');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', checkGeminiAPI);
 
         // --- Sanity checks so “Signup Error” is actually actionable
         function validateConfig() {
@@ -586,7 +585,16 @@ window.addEventListener('DOMContentLoaded', checkGeminiAPI);
                 // For demonstration, let's reuse the repertoire hub to show the message.
                 const repertoireHub = document.getElementById('repertoire-hub-section');
                 if(repertoireHub) {
-                    repertoireHub.querySelector('p').textContent = welcomeMessage;
+                    const welcomeP = repertoireHub.querySelector('p');
+                    if (welcomeP) {
+                        welcomeP.textContent = welcomeMessage;
+                    } else {
+                        // Create a welcome paragraph if it doesn't exist
+                        const welcomeParagraph = document.createElement('p');
+                        welcomeParagraph.textContent = welcomeMessage;
+                        welcomeParagraph.className = 'text-center text-gray-800 dark:text-gray-300 mb-4';
+                        repertoireHub.insertBefore(welcomeParagraph, repertoireHub.firstChild.nextSibling);
+                    }
                 }
 
                // Show premium sections
@@ -603,7 +611,7 @@ window.addEventListener('DOMContentLoaded', checkGeminiAPI);
                  navSignupBtn?.classList.remove('hidden');
                 navSignoutBtn?.classList.add('hidden');
                 
-                const signupSection = document.getElementById('signup');
+                const signupSection = document.getElementById('signup-section');
                 if (signupSection) signupSection.classList.remove('hidden');
                 
                 // Explicitly hide premium sections for anonymous users
@@ -786,11 +794,30 @@ window.addEventListener('DOMContentLoaded', checkGeminiAPI);
         // --- Auth state observer ---
         if (auth) {
             onAuthStateChanged(auth, user => {
-                if (user) {
-                    console.log("User is signed in:", user.uid, "isAnonymous:", !!user.isAnonymous);
-                    showSignedInUI(user);
-                } else {
-                    console.log("User is signed out.");
+                try {
+                    if (user) {
+                        console.log("User is signed in:", user.uid, "isAnonymous:", !!user.isAnonymous);
+                        showSignedInUI(user);
+                        // Load user-specific theme after auth state is confirmed
+                        loadUserBoardTheme(user);
+                    } else {
+                        console.log("User is signed out.");
+                        showSignedOutUI();
+                        // Clear user-specific data on sign out
+                        try {
+                            const keys = Object.keys(localStorage);
+                            keys.forEach(key => {
+                                if (key.startsWith('boardTheme_')) {
+                                    localStorage.removeItem(key);
+                                }
+                            });
+                        } catch (e) {
+                            console.warn('Could not clear user-specific localStorage', e);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error in auth state change handler:', error);
+                    // Fallback to signed out state if there's an error
                     showSignedOutUI();
                 }
             });
@@ -799,25 +826,55 @@ window.addEventListener('DOMContentLoaded', checkGeminiAPI);
         }
 
         // --- Initial Sign In (anonymous by default if no token) ---
+        // Wait for auth to be fully initialized before attempting anonymous sign-in
         (async function initialSignIn() {
             if (!auth) return;
-            try {
-                // No server token on GitHub Pages; just go anonymous for onboarding
-                await signInAnonymously(auth);
-            } catch (error) {
-                console.error("Initial sign-in error:", error);
-            }
+            
+            // Add a small delay to ensure auth state observer is set up
+            setTimeout(async () => {
+                try {
+                    // Only sign in anonymously if no user is already signed in
+                    if (!auth.currentUser) {
+                        console.log("No current user, signing in anonymously...");
+                        await signInAnonymously(auth);
+                    } else {
+                        console.log("User already signed in:", auth.currentUser.uid);
+                    }
+                } catch (error) {
+                    console.error("Initial sign-in error:", error);
+                    // If anonymous sign-in fails, just show signed out UI
+                    showSignedOutUI();
+                }
+            }, 100);
         })();
 
         // --- Sign Out ---
-        navSignoutBtn?.addEventListener('click', () => {
+        navSignoutBtn?.addEventListener('click', async () => {
             if (!auth) return;
-            signOut(auth).catch((error) => {
+            try {
+                // Clear user-specific data before signing out
+                try {
+                    const keys = Object.keys(localStorage);
+                    keys.forEach(key => {
+                        if (key.startsWith('boardTheme_') || key.startsWith('performanceStats_')) {
+                            localStorage.removeItem(key);
+                        }
+                    });
+                } catch (e) {
+                    console.warn('Could not clear user-specific localStorage', e);
+                }
+                
+                // Sign out from Firebase
+                await signOut(auth);
+                
+                // On sign out, revert to the default theme
+                applyBoardTheme('classic');
+                
+                console.log('User signed out successfully');
+            } catch (error) {
                 console.error('Sign Out Error', error);
                 openModal('Sign Out Failed', 'There was a problem signing you out. Please try again.');
-            });
-            // On sign out, revert to the default theme
-            applyBoardTheme('classic');
+            }
         });
 
         // --- Smooth Scrolling helpers ---
