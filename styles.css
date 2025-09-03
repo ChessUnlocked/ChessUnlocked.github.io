@@ -1,0 +1,27 @@
+/* Custom styles */
+body { font-family: 'Inter', sans-serif; }
+.bg-gradient-header { background-image: linear-gradient(to right, #4338ca, #7e22ce, #db2777); }
+.bg-gradient-hero { background-image: linear-gradient(to right, #312e81, #581c87, #9d174d); }
+.bg-gradient-signup { background-image: linear-gradient(to right, #facc15, #fde047); }
+.chessboard {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    width: min(80vw, 400px);
+    aspect-ratio: 1 / 1;
+    border: 10px solid #6b3d25; border-radius: 8px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    font-size: min(6vw, 32px);
+}
+.chessboard-square { display: flex; justify-content: center; align-items: center; user-select: none; }
+.light-square { background-color: #f0d9b5; }
+.dark-square { background-color: #b58863; }
+.piece { text-shadow: 0 2px 4px rgba(0,0,0,0.25); transition: transform 0.3s ease-in-out; line-height: 1; }
+.feature-card { cursor: pointer; }
+.locked { opacity: 0.6; }
+/* tiny utility for an inline status ribbon */
+.ribbon {
+  position: fixed; bottom: 16px; right: 16px; z-index: 50;
+  background: #111827; color: #f9fafb; border-radius: 8px;
+  padding: 10px 14px; font-size: 12px; box-shadow: 0 10px 20px rgba(0,0,0,.25);
+}

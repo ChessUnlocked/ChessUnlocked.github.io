@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ChessUnlocked - Level Up Your Chess Openings</title>
+    <meta name="description" content="Master chess openings with ChessUnlocked. Learn the London System, Slav Defense, King's Indian, and more with spaced repetition, rich stats, and community wisdom.">
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,40 +14,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+
     <!-- PGN Parser Library -->
     <script src="https://cdn.jsdelivr.net/npm/pgn-parser@1.1.0/pgn-parser.js"></script>
 
-    <style>
-        /* Custom styles */
-        body { font-family: 'Inter', sans-serif; }
-        .bg-gradient-header { background-image: linear-gradient(to right, #4338ca, #7e22ce, #db2777); }
-        .bg-gradient-hero { background-image: linear-gradient(to right, #312e81, #581c87, #9d174d); }
-        .bg-gradient-signup { background-image: linear-gradient(to right, #facc15, #fde047); }
-        .chessboard {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            grid-template-rows: repeat(8, 1fr);
-            width: min(80vw, 400px);
-            aspect-ratio: 1 / 1;
-            border: 10px solid #6b3d25; border-radius: 8px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            font-size: min(6vw, 32px);
-        }
-        .chessboard-square { display: flex; justify-content: center; align-items: center; user-select: none; }
-        .light-square { background-color: #f0d9b5; }
-        .dark-square { background-color: #b58863; }
-        .piece { text-shadow: 0 2px 4px rgba(0,0,0,0.25); transition: transform 0.3s ease-in-out; line-height: 1; }
-        .feature-card { cursor: pointer; }
-        .locked { opacity: 0.6; }
-        /* tiny utility for an inline status ribbon */
-        .ribbon {
-          position: fixed; bottom: 16px; right: 16px; z-index: 50;
-          background: #111827; color: #f9fafb; border-radius: 8px;
-          padding: 10px 14px; font-size: 12px; box-shadow: 0 10px 20px rgba(0,0,0,.25);
-        }
-    </style>
 </head>
 <body class="bg-indigo-50 dark:bg-gray-900 transition-colors duration-500">
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-indigo-600 text-white px-4 py-2 rounded">Skip to main content</a>
     <div id="statusRibbon" class="fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg text-white text-sm bg-gray-900 hidden" style="z-index:9999;"></div>
 
     <!-- Header -->
@@ -56,7 +32,7 @@
                 ChessUnlocked
             </h1>
             <div class="flex items-center">
-                <nav id="main-nav" class="space-x-4 text-lg font-semibold hidden md:flex items-center">
+                 <nav id="main-nav" class="space-x-4 text-lg font-semibold hidden md:flex items-center" role="navigation" aria-label="Main navigation">
                     <button id="nav-repertoire-btn" class="hover:text-yellow-300 transition-colors duration-200 focus:outline-none">Repertoire Hub</button>
                     <button id="nav-explorer-btn" class="hover:text-yellow-300 transition-colors duration-200 focus:outline-none">Explorer</button>
                     <button id="nav-practice-btn" class="hover:text-yellow-300 transition-colors duration-200 focus:outline-none">Practice</button>
@@ -73,7 +49,7 @@
         </div>
     </header>
 
-    <main>
+    <main id="main">
         <!-- Hero -->
         <section class="bg-gradient-hero text-white py-24 px-6 text-center">
             <h2 class="text-5xl font-extrabold mb-4 max-w-3xl mx-auto leading-tight">
@@ -93,51 +69,51 @@
                 Everything You Need to Succeed
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div id="repertoire" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300">
+                <article id="repertoire" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300">
                     <div class="text-5xl mb-4">♟️</div>
                     <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-yellow-400">Repertoire Hub</h3>
                     <p class="text-gray-700 dark:text-gray-300">Explore the full ECO-indexed opening list with powerful search and filtering.</p>
-                </div>
+                 </article>
 
-                <div id="explorer" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300">
+                <article id="explorer" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300">
                     <div class="text-5xl mb-4">🗺️</div>
                     <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-yellow-400">Explorer Board</h3>
                     <p class="text-gray-700 dark:text-gray-300">Watch famous openings unfold and explore key variations.</p>
-                </div>
+                 </article>
 
-                <div id="practice" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300">
+                <article id="practice" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300">
                     <div class="text-5xl mb-4">🎯</div>
                     <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-yellow-400">Practice Modes</h3>
                     <p class="text-gray-700 dark:text-gray-300">Master openings through Learn, Drill, Time Trials, and Puzzle Galleries.</p>
-                </div>
+                 </article>
 
                 <!-- Recommendations: requires full sign-in to call the coach -->
-                <div id="recommendations" data-requires-auth="true" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300 locked" role="button" tabindex="0" aria-pressed="false">
+                 <article id="recommendations" data-requires-auth="true" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300 locked" role="button" tabindex="0" aria-pressed="false">
                     <div class="text-5xl mb-4">💡</div>
                     <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-yellow-400">✨ Recommendations</h3>
                     <p class="text-gray-700 dark:text-gray-300">Get expert suggestions to expand and refine your repertoire.</p>
-                </div>
+                 </article>
 
                 <!-- Customization: gated -->
-                <div id="customization" data-requires-auth="true" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300 locked" role="button" tabindex="0">
+                 <article id="customization" data-requires-auth="true" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300 locked" role="button" tabindex="0">
                     <div class="text-5xl mb-4">🎨</div>
                     <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-yellow-400">Customization</h3>
                     <p class="text-gray-700 dark:text-gray-300">Themes, dark mode, and board styles tailored to your preferences.</p>
-                </div>
+                 </article>
 
                 <!-- Analysis: gated -->
-                <div id="analysis" data-requires-auth="true" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300 locked" role="button" tabindex="0">
+                 <article id="analysis" data-requires-auth="true" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300 locked" role="button" tabindex="0">
                     <div class="text-5xl mb-4">📈</div>
                     <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-yellow-400">Game Analysis</h3>
                     <p class="text-gray-700 dark:text-gray-300">Upload your games to receive opening insights and coaching hints.</p>
-                </div>
+                 </article>
 
                 <!-- Stats: gated -->
-                <div id="stats" data-requires-auth="true" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300 locked" role="button" tabindex="0">
+                 <article id="stats" data-requires-auth="true" class="feature-card bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center flex flex-col items-center hover:shadow-2xl transition-shadow duration-300 locked" role="button" tabindex="0">
                     <div class="text-5xl mb-4">📊</div>
                     <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-yellow-400">Performance Stats</h3>
                     <p class="text-gray-700 dark:text-gray-300">Track your progress and identify areas for improvement.</p>
-                </div>
+                 </article>
             </div>
         </section>
 
