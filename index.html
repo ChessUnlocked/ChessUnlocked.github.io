@@ -6,7 +6,7 @@
     <title>ChessUnlocked - Level Up Your Chess Openings</title>
     <meta name="description" content="Master chess openings with ChessUnlocked. Learn the London System, Slav Defense, King's Indian, and more with spaced repetition, rich stats, and community wisdom.">
 
-    <!-- Tailwind -->
+    <!-- Tailwind CDN - For development/demo purposes only. Use build process for production. -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Fonts -->
@@ -17,8 +17,8 @@
     <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
 
-    <!-- PGN Parser Library -->
-    <script src="https://cdn.jsdelivr.net/npm/pgn-parser@1.1.0/pgn-parser.js"></script>
+    <!-- PGN Parser Library - Alternative CDN for better compatibility -->
+    <script src="https://unpkg.com/pgn-parser@2.2.1/pgn-parser.js"></script>
 
 </head>
 <body class="bg-indigo-50 dark:bg-gray-900 transition-colors duration-500">
@@ -412,18 +412,18 @@
             'French Defense': [
                 { pos: ['rnbqkbnr','pppppppp','........','........','........','........','PPPPPPPP','RNBQKBNR'], move: 'Starting Position' },
                 { pos: ['rnbqkbnr','pppppppp','........','........','....P...','........','PPPP.PPP','RNBQKBNR'], move: '1. e4' },
-                { pos: ['rnbqkbnr','pppp.ppp','........','....p...','....P...','........','PPPP.PPP','RNBQKBNR'], move: '1... e6' },
-                { pos: ['rnbqkbnr','pppp.ppp','........','....p...','...PP...','........','PPP..PPP','RNBQKBNR'], move: '2. d4' },
-                { pos: ['rnbqkbnr','ppp..ppp','........','...pp...','...PP...','........','PPP..PPP','RNBQKBNR'], move: '2... d5' },
-                { pos: ['rnbqkbnr','ppp..ppp','........','...pp...','...PP...','.....N..','PPP..PPP','RNBQKB.R'], move: '3. Nf3' },
+                { pos: ['rnbqkbnr','pppp.ppp','....p...','........','....P...','........','PPPP.PPP','RNBQKBNR'], move: '1... e6' },
+                { pos: ['rnbqkbnr','pppp.ppp','....p...','........','...PP...','........','PPP..PPP','RNBQKBNR'], move: '2. d4' },
+                { pos: ['rnbqkbnr','ppp..ppp','....p...','...p....','...PP...','........','PPP..PPP','RNBQKBNR'], move: '2... d5' },
+                { pos: ['rnbqkbnr','ppp..ppp','....p...','...p....','...PP...','.....N..','PPP..PPP','RNBQKB.R'], move: '3. Nf3' },
             ],
             'King\'s Indian Defense': [
                 { pos: ['rnbqkbnr','pppppppp','........','........','........','........','PPPPPPPP','RNBQKBNR'], move: 'Starting Position' },
                 { pos: ['rnbqkbnr','pppppppp','........','........','...P....','........','PPP.PPPP','RNBQKBNR'], move: '1. d4' },
-                { pos: ['rnbqkb.r','pppppp.p','.....np.','........','...P....','........','PPP.PPPP','RNBQKBNR'], move: '1... Nf6' },
-                { pos: ['rnbqkb.r','pppppp.p','.....np.','........','..PP....','........','PP..PPPP','RNBQKBNR'], move: '2. c4' },
-                { pos: ['rnbqkb.r','pppppp.p','......p.','........','..PP....','........','PP..PPPP','RNBQKBNR'], move: '2... g6' },
-                { pos: ['rnbqkb.r','pppppp.p','......p.','........','..PP....','.....N..','PP..PPPP','RNBQKB.R'], move: '3. Nf3' },
+                { pos: ['rnbqkb.r','pppppppp','.....n..','........','...P....','........','PPP.PPPP','RNBQKBNR'], move: '1... Nf6' },
+                { pos: ['rnbqkb.r','pppppppp','.....n..','........','..PP....','........','PP..PPPP','RNBQKBNR'], move: '2. c4' },
+                { pos: ['rnbqkb.r','pppppp.p','.....n.p','........','..PP....','........','PP..PPPP','RNBQKBNR'], move: '2... g6' },
+                { pos: ['rnbqkb.r','pppppp.p','.....n.p','........','..PP....','.....N..','PP..PPPP','RNBQKB.R'], move: '3. Nf3' },
             ]
         };
         
@@ -452,6 +452,40 @@
                     }
                     board.appendChild(square);
                 }
+            }
+            
+            // Reapply current board theme after rendering
+            reapplyCurrentBoardTheme();
+        }
+        
+        function reapplyCurrentBoardTheme() {
+            try {
+                const user = auth?.currentUser;
+                let currentTheme = 'classic'; // Default theme
+                
+                if (user && !user.isAnonymous) {
+                    // If a user is signed in, try to load their specific theme
+                    const userTheme = localStorage.getItem(`boardTheme_${user.uid}`);
+                    if (userTheme && boardThemes[userTheme]) {
+                        currentTheme = userTheme;
+                    }
+                } else {
+                    // Fallback to global theme for anonymous users
+                    const globalTheme = localStorage.getItem('boardTheme');
+                    if (globalTheme && boardThemes[globalTheme]) {
+                        currentTheme = globalTheme;
+                    }
+                }
+                
+                // Apply the theme without saving (since we're just reapplying)
+                const theme = boardThemes[currentTheme];
+                if (theme && boardElement) {
+                    boardElement.style.borderColor = theme.border;
+                    document.querySelectorAll('.light-square').forEach(sq => sq.style.backgroundColor = theme.light);
+                    document.querySelectorAll('.dark-square').forEach(sq => sq.style.backgroundColor = theme.dark);
+                }
+            } catch (e) {
+                console.warn('Could not reapply board theme', e);
             }
         }
         
