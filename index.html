@@ -139,12 +139,23 @@
             </div>
             <div class="mt-6 text-center max-w-lg mx-auto">
                 <p id="opening-info" class="text-gray-800 dark:text-gray-300 mb-4">
-                    Watch a demonstration of a popular opening! Click the button to see the moves.
+                    Watch a demonstration of popular chess openings! Select an opening and click play to see the moves.
                 </p>
+                <div class="mb-4">
+                    <label for="openingSelector" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Choose Opening:</label>
+                    <select id="openingSelector" class="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="Ruy Lopez">Ruy Lopez</option>
+                        <option value="Sicilian Defense">Sicilian Defense</option>
+                        <option value="Queen's Gambit">Queen's Gambit</option>
+                        <option value="Italian Game">Italian Game</option>
+                        <option value="French Defense">French Defense</option>
+                        <option value="King's Indian Defense">King's Indian Defense</option>
+                    </select>
+                </div>
                 <div class="flex items-center justify-center space-x-4">
                     <button id="prevMoveBtn" class="bg-gray-600 text-white font-bold px-4 py-2 rounded-lg shadow-md hover:bg-gray-500 transition" disabled>< Prev</button>
                     <button id="animate-opening-btn" class="bg-indigo-600 text-white font-bold px-6 py-2 rounded-lg shadow-md hover:bg-indigo-500 transition">
-                        Play Ruy Lopez Opening
+                        Play Ruy Lopez
                     </button>
                     <button id="nextMoveBtn" class="bg-gray-600 text-white font-bold px-4 py-2 rounded-lg shadow-md hover:bg-gray-500 transition" disabled>Next ></button>
                 </div>
@@ -310,6 +321,7 @@
         let boardElement = document.getElementById('chessboard');
         const openingInfo = document.getElementById('opening-info');
         const animateBtn = document.getElementById('animate-opening-btn');
+        const openingSelector = document.getElementById('openingSelector');
 
         // --- Premium Content ---
         const premiumSections = ['repertoire-hub-section', 'explorer-section', 'practice-section'];
@@ -363,15 +375,60 @@
             applyTheme(newIsDark);
         });
 
-        // --- Chessboard rendering and animation (Ruy Lopez demo) ---
-        const ruyLopezSequence = [
-            { pos: ['rnbqkbnr','pppppppp','........','........','........','........','PPPPPPPP','RNBQKBNR'], move: 'Starting Position' },
-            { pos: ['rnbqkbnr','pppppppp','........','........','....P...','........','PPPP.PPP','RNBQKBNR'], move: '1. e4' },
-            { pos: ['rnbqkbnr','pppp.ppp','........','....p...','....P...','........','PPPP.PPP','RNBQKBNR'], move: '1... e5' },
-            { pos: ['rnbqkbnr','pppp.ppp','........','....p...','....P...','.....N..','PPPP.PPP','RNBQKB.R'], move: '2. Nf3' },
-            { pos: ['r.bqkbnr','pppp.ppp','..n.....','....p...','....P...','.....N..','PPPP.PPP','RNBQKB.R'], move: '2... Nc6' },
-            { pos: ['r.bqkbnr','pppp.ppp','..n.....','.B..p...','....P...','.....N..','PPPP.PPP','RNBQK..R'], move: '3. Bb5' },
-        ];
+        // --- Chessboard rendering and animation (Multiple opening sequences) ---
+        const openingSequences = {
+            'Ruy Lopez': [
+                { pos: ['rnbqkbnr','pppppppp','........','........','........','........','PPPPPPPP','RNBQKBNR'], move: 'Starting Position' },
+                { pos: ['rnbqkbnr','pppppppp','........','........','....P...','........','PPPP.PPP','RNBQKBNR'], move: '1. e4' },
+                { pos: ['rnbqkbnr','pppp.ppp','........','....p...','....P...','........','PPPP.PPP','RNBQKBNR'], move: '1... e5' },
+                { pos: ['rnbqkbnr','pppp.ppp','........','....p...','....P...','.....N..','PPPP.PPP','RNBQKB.R'], move: '2. Nf3' },
+                { pos: ['r.bqkbnr','pppp.ppp','..n.....','....p...','....P...','.....N..','PPPP.PPP','RNBQKB.R'], move: '2... Nc6' },
+                { pos: ['r.bqkbnr','pppp.ppp','..n.....','.B..p...','....P...','.....N..','PPPP.PPP','RNBQK..R'], move: '3. Bb5' },
+            ],
+            'Sicilian Defense': [
+                { pos: ['rnbqkbnr','pppppppp','........','........','........','........','PPPPPPPP','RNBQKBNR'], move: 'Starting Position' },
+                { pos: ['rnbqkbnr','pppppppp','........','........','....P...','........','PPPP.PPP','RNBQKBNR'], move: '1. e4' },
+                { pos: ['rnbqkbnr','pp.ppppp','........','..p.....','....P...','........','PPPP.PPP','RNBQKBNR'], move: '1... c5' },
+                { pos: ['rnbqkbnr','pp.ppppp','........','..p.....','....P...','.....N..','PPPP.PPP','RNBQKB.R'], move: '2. Nf3' },
+                { pos: ['rnbqkbnr','pp.ppp.p','......p.','..p.....','....P...','.....N..','PPPP.PPP','RNBQKB.R'], move: '2... g6' },
+                { pos: ['rnbqkbnr','pp.ppp.p','......p.','..p.....','...PP...','.....N..','PPP..PPP','RNBQKB.R'], move: '3. d4' },
+            ],
+            'Queen\'s Gambit': [
+                { pos: ['rnbqkbnr','pppppppp','........','........','........','........','PPPPPPPP','RNBQKBNR'], move: 'Starting Position' },
+                { pos: ['rnbqkbnr','pppppppp','........','........','...P....','........','PPP.PPPP','RNBQKBNR'], move: '1. d4' },
+                { pos: ['rnbqkbnr','ppp.pppp','........','...p....','...P....','........','PPP.PPPP','RNBQKBNR'], move: '1... d5' },
+                { pos: ['rnbqkbnr','ppp.pppp','........','...p....','..PP....','........','PP..PPPP','RNBQKBNR'], move: '2. c4' },
+                { pos: ['rnbqkbnr','ppp.pp.p','......p.','...p....','..PP....','........','PP..PPPP','RNBQKBNR'], move: '2... g6' },
+                { pos: ['rnbqkbnr','ppp.pp.p','......p.','...p....','..PP....','.....N..','PP..PPPP','RNBQKB.R'], move: '3. Nf3' },
+            ],
+            'Italian Game': [
+                { pos: ['rnbqkbnr','pppppppp','........','........','........','........','PPPPPPPP','RNBQKBNR'], move: 'Starting Position' },
+                { pos: ['rnbqkbnr','pppppppp','........','........','....P...','........','PPPP.PPP','RNBQKBNR'], move: '1. e4' },
+                { pos: ['rnbqkbnr','pppp.ppp','........','....p...','....P...','........','PPPP.PPP','RNBQKBNR'], move: '1... e5' },
+                { pos: ['rnbqkbnr','pppp.ppp','........','....p...','....P...','.....N..','PPPP.PPP','RNBQKB.R'], move: '2. Nf3' },
+                { pos: ['r.bqkbnr','pppp.ppp','..n.....','....p...','....P...','.....N..','PPPP.PPP','RNBQKB.R'], move: '2... Nc6' },
+                { pos: ['r.bqkbnr','pppp.ppp','..n.....','....p...','..B.P...','.....N..','PPPP.PPP','RNBQK..R'], move: '3. Bc4' },
+            ],
+            'French Defense': [
+                { pos: ['rnbqkbnr','pppppppp','........','........','........','........','PPPPPPPP','RNBQKBNR'], move: 'Starting Position' },
+                { pos: ['rnbqkbnr','pppppppp','........','........','....P...','........','PPPP.PPP','RNBQKBNR'], move: '1. e4' },
+                { pos: ['rnbqkbnr','pppp.ppp','........','....p...','....P...','........','PPPP.PPP','RNBQKBNR'], move: '1... e6' },
+                { pos: ['rnbqkbnr','pppp.ppp','........','....p...','...PP...','........','PPP..PPP','RNBQKBNR'], move: '2. d4' },
+                { pos: ['rnbqkbnr','ppp..ppp','........','...pp...','...PP...','........','PPP..PPP','RNBQKBNR'], move: '2... d5' },
+                { pos: ['rnbqkbnr','ppp..ppp','........','...pp...','...PP...','.....N..','PPP..PPP','RNBQKB.R'], move: '3. Nf3' },
+            ],
+            'King\'s Indian Defense': [
+                { pos: ['rnbqkbnr','pppppppp','........','........','........','........','PPPPPPPP','RNBQKBNR'], move: 'Starting Position' },
+                { pos: ['rnbqkbnr','pppppppp','........','........','...P....','........','PPP.PPPP','RNBQKBNR'], move: '1. d4' },
+                { pos: ['rnbqkb.r','pppppp.p','.....np.','........','...P....','........','PPP.PPPP','RNBQKBNR'], move: '1... Nf6' },
+                { pos: ['rnbqkb.r','pppppp.p','.....np.','........','..PP....','........','PP..PPPP','RNBQKBNR'], move: '2. c4' },
+                { pos: ['rnbqkb.r','pppppp.p','......p.','........','..PP....','........','PP..PPPP','RNBQKBNR'], move: '2... g6' },
+                { pos: ['rnbqkb.r','pppppp.p','......p.','........','..PP....','.....N..','PP..PPPP','RNBQKB.R'], move: '3. Nf3' },
+            ]
+        };
+        
+        let currentSequence = openingSequences['Ruy Lopez'];
+        let currentOpeningName = 'Ruy Lopez';
         let animationInterval = null;
         function renderBoard(position, targetElement) {
             const board = targetElement || boardElement;
@@ -397,24 +454,44 @@
                 }
             }
         }
-        // initial render
-        renderBoard(ruyLopezSequence[0].pos);
-        animateBtn?.addEventListener('click', () => {
+        
+        function playOpeningAnimation(openingName) {
+            const sequence = openingSequences[openingName];
+            if (!sequence) return;
+            
             clearInterval(animationInterval);
             let moveIndex = 0;
             animateBtn.disabled = true;
+            animateBtn.textContent = `Playing ${openingName}...`;
+            
             animationInterval = setInterval(() => {
-                if (moveIndex >= ruyLopezSequence.length) {
+                if (moveIndex >= sequence.length) {
                     clearInterval(animationInterval);
-                    openingInfo.textContent = "That's the Ruy Lopez! Click again to replay.";
+                    openingInfo.textContent = `That's the ${openingName}! Select another opening or click to replay.`;
                     animateBtn.disabled = false;
+                    animateBtn.textContent = `Play ${openingName}`;
                     return;
                 }
-                const currentMove = ruyLopezSequence[moveIndex];
+                const currentMove = sequence[moveIndex];
                 openingInfo.textContent = currentMove.move;
                 renderBoard(currentMove.pos);
                 moveIndex++;
             }, 1200);
+        }
+        
+        // Add event listener for opening selector
+        openingSelector?.addEventListener('change', (e) => {
+            currentOpeningName = e.target.value;
+            currentSequence = openingSequences[currentOpeningName];
+            renderBoard(currentSequence[0].pos);
+            animateBtn.textContent = `Play ${currentOpeningName}`;
+            openingInfo.textContent = `Ready to play ${currentOpeningName}. Click the button to see the moves.`;
+        });
+        
+        // initial render
+        renderBoard(currentSequence[0].pos);
+        animateBtn?.addEventListener('click', () => {
+            playOpeningAnimation(currentOpeningName);
         });
 
         // --- App UI helpers (lock/unlock gated features) ---
@@ -1281,9 +1358,19 @@
         function generateBoardStatesFromPgn(pgn) {
             // This is a mock function. A real implementation would require a full chess engine
             // to correctly generate board states (FENs) from PGN moves.
-            // For now, we'll just use the hardcoded Ruy Lopez sequence if it matches.
+            // For now, we'll match against known openings and return their sequences
             if (pgn.includes('Bb5')) {
-                return ruyLopezSequence.map(s => s.pos);
+                return openingSequences['Ruy Lopez'].map(s => s.pos);
+            } else if (pgn.includes('c5')) {
+                return openingSequences['Sicilian Defense'].map(s => s.pos);
+            } else if (pgn.includes('d4 d5 2. c4')) {
+                return openingSequences['Queen\'s Gambit'].map(s => s.pos);
+            } else if (pgn.includes('Bc4')) {
+                return openingSequences['Italian Game'].map(s => s.pos);
+            } else if (pgn.includes('e6')) {
+                return openingSequences['French Defense'].map(s => s.pos);
+            } else if (pgn.includes('Nf6 2. c4 g6')) {
+                return openingSequences['King\'s Indian Defense'].map(s => s.pos);
             }
             // Return a simple sequence for other openings for demonstration
             return [
@@ -1327,49 +1414,49 @@
         const practiceDrills = [
             {
                 name: 'Name the Opening',
-                board: ['r.bqkbnr','pppp.ppp','..n.....','.B..p...','....P...','.....N..','PPPP.PPP','RNBQK..R'], // Ruy Lopez
+                board: ['r.bqkbnr','pppp.ppp','..n.....','.B..p...','....P...','.....N..','PPPP.PPP','RNBQK..R'], // Ruy Lopez after 3. Bb5
                 question: 'Which opening is shown on the board?',
                 options: ['Sicilian Defense', 'Ruy Lopez', 'Queen\'s Gambit'],
                 answer: 'Ruy Lopez'
             },
             {
                 name: 'Name the Opening',
-                board: ['rnbqkbnr','pppp.ppp','........','....p...','....P...','........','PPPP.PPP','RNBQKBNR'], // King's Pawn
+                board: ['rnbqkbnr','pppp.ppp','........','....p...','....P...','........','PPPP.PPP','RNBQKBNR'], // King's Pawn after 1. e4 e5
                 question: 'Which opening is shown on the board?',
                 options: ['King\'s Pawn Opening', 'French Defense', 'Italian Game'],
                 answer: 'King\'s Pawn Opening'
             },
             {
                 name: 'Name the Opening',
-                board: ['rnbqkbnr','pp.ppppp','..n.....','..p.....','....P...','.....N..','PPPP.PPP','R.BQKB.R'], // Sicilian Defense
+                board: ['rnbqkbnr','pp.ppppp','........','..p.....','....P...','........','PPPP.PPP','RNBQKBNR'], // Sicilian Defense after 1. e4 c5
                 question: 'Which opening is shown on the board?',
                 options: ['French Defense', 'Caro-Kann Defense', 'Sicilian Defense'],
                 answer: 'Sicilian Defense'
             },
             {
                 name: 'Name the Opening',
-                board: ['rnbqkbnr','pppp.ppp','.....p..','........','....P...','........','PPPP.PPP','RNBQKBNR'], // French Defense
+                board: ['rnbqkbnr','pppp.ppp','........','....p...','....P...','........','PPPP.PPP','RNBQKBNR'], // French Defense after 1. e4 e6
                 question: 'Which opening is shown on the board?',
                 options: ['French Defense', 'Slav Defense', 'Dutch Defense'],
                 answer: 'French Defense'
             },
             {
                 name: 'Name the Opening',
-                board: ['rnbqkbnr','ppp.pppp','..n.....','...p....','..P.P...','.....N..','PP.P.PPP','RNBQKB.R'], // Queen's Gambit
+                board: ['rnbqkbnr','ppp.pppp','........','...p....','..P.....','........','PP.PPPPP','RNBQKBNR'], // Queen's Gambit after 1. d4 d5 2. c4
                 question: 'Which opening is shown on the board?',
                 options: ['Queen\'s Gambit', 'King\'s Gambit', 'London System'],
                 answer: 'Queen\'s Gambit'
             },
             {
                 name: 'Name the Opening',
-                board: ['r.bqkbnr','pppp.ppp','..n..n..','.B.p....','..B.P...','.....N..','PPPP.PPP','R.Q.K..R'], // Italian Game
+                board: ['r.bqkbnr','pppp.ppp','..n..n..','....p...','..B.P...','........','PPPP.PPP','RNBQK.NR'], // Italian Game after 1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6
                 question: 'Which opening is shown on the board?',
                 options: ['Ruy Lopez', 'Italian Game', 'Scotch Game'],
                 answer: 'Italian Game'
             },
             {
                 name: 'Name the Opening',
-                board: ['rnbqkb.r','pppp.p.p','..n..p..','........','..P.P...','...N....','PP.P.NPP','R.BQKB.R'], // King's Indian Defense
+                board: ['rnbqkb.r','pppppp.p','......p.','........','..P.....','........','PP.PPPPP','RNBQKBNR'], // King's Indian Defense after 1. d4 Nf6 2. c4 g6
                 question: 'Which opening is shown on the board?',
                 options: ['Grünfeld Defense', 'King\'s Indian Defense', 'Nimzo-Indian Defense'],
                 answer: 'King\'s Indian Defense'
