@@ -643,14 +643,16 @@
             }
         })();
 
+        console.log("🔧 Attempting Firebase initialization...");
         try {
             app = initializeApp(CONFIG.FIREBASE);
             auth = getAuth(app);
             db = getFirestore(app);
-            console.log("✅ Firebase initialized.");
+            console.log("✅ Firebase initialized successfully. Auth:", !!auth, "DB:", !!db);
             setRibbon('Firebase ready', 'bg-emerald-700');
         } catch (error) {
             console.error("❌ Firebase initialization failed:", error);
+            console.error("Config used:", CONFIG.FIREBASE);
             setRibbon('Firebase init failed — open console', 'bg-red-700');
             const firebaseErrorDiv = document.getElementById('firebase-error');
             if (firebaseErrorDiv) {
@@ -663,8 +665,10 @@
         }
 
         // --- Auth state observer ---
+        console.log("🔧 Setting up auth state observer. Auth available:", !!auth);
         if (auth) {
             onAuthStateChanged(auth, user => {
+                console.log("🔄 Auth state changed. User:", user ? user.uid : 'null', "Anonymous:", user ? !!user.isAnonymous : 'N/A');
                 try {
                     if (user) {
                         console.log("User is signed in:", user.uid, "isAnonymous:", !!user.isAnonymous);
@@ -693,26 +697,34 @@
                 }
             });
         } else {
+            console.log("❌ Auth not available, showing signed out UI");
             showSignedOutUI();
         }
 
         // --- Initial Sign In (anonymous by default if no token) ---
         // Wait for auth to be fully initialized before attempting anonymous sign-in
+        console.log("🔧 Setting up initial sign-in...");
         (async function initialSignIn() {
-            if (!auth) return;
-            
+            console.log("🔧 Initial sign-in function called. Auth:", !!auth);
+            if (!auth) {
+                console.log("❌ No auth available for initial sign-in");
+                return;
+            }
+
             // Add a small delay to ensure auth state observer is set up
             setTimeout(async () => {
+                console.log("🔧 Timeout reached, checking current user...");
                 try {
                     // Only sign in anonymously if no user is already signed in
                     if (!auth.currentUser) {
                         console.log("No current user, signing in anonymously...");
                         await signInAnonymously(auth);
+                        console.log("✅ Anonymous sign-in successful");
                     } else {
                         console.log("User already signed in:", auth.currentUser.uid);
                     }
                 } catch (error) {
-                    console.error("Initial sign-in error:", error);
+                    console.error("❌ Initial sign-in error:", error);
                     // If anonymous sign-in fails, just show signed out UI
                     showSignedOutUI();
                 }
